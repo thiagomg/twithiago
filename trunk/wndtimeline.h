@@ -4,7 +4,7 @@
 #include <QtGui/QMainWindow>
 #include <QFrame>
 
-#include "Twitter.h"
+#include "twitter.h"
 
 namespace Ui
 {
