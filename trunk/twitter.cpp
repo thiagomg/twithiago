@@ -32,7 +32,7 @@ bool Twitter::getDirectsTimeline(int count)
 	return _getTimeline( _directsUrl, count );
 }
 
-bool Twitter::_checkProxy()
+bool Twitter::_checkProxy(QUrl &netUrl)
 {
 	if( _proxyUser.size() > 0 ) {
 		QNetworkProxyQuery query(netUrl);
@@ -46,6 +46,7 @@ bool Twitter::_checkProxy()
 		}
 
 	}
+	return true;
 }
 
 bool Twitter::_getTimeline(const QString &url, int count)
@@ -56,7 +57,7 @@ bool Twitter::_getTimeline(const QString &url, int count)
 
 	QUrl netUrl( url );
 
-	_checkProxy(); //Use proxy ?
+	_checkProxy(netUrl); //Use proxy ?
 
 	QNetworkRequest request(url);
 
@@ -74,7 +75,7 @@ bool Twitter::_getTimeline(const QString &url, int count)
 
 bool Twitter::_postUpdate()
 {
-
+	return false;
 }
 
 void Twitter::onNetRecv(QNetworkReply *reply)

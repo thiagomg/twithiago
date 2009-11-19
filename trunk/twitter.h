@@ -31,7 +31,7 @@ public:
 protected:
 	bool _getTimeline(const QString &url, int count);
 	bool _postUpdate();
-	bool _checkProxy();
+	bool _checkProxy(QUrl &netUrl);
 
 signals:
 	void onFriendsTimelineXML(const QString &timeLine, int error);
