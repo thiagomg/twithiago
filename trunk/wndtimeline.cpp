@@ -8,6 +8,9 @@
 #include <QLabel>
 #include <QCommandLinkButton>
 
+//TODO: pass to config
+#define MSG_COUNT 50
+
 WndTimeline::WndTimeline(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::WndTimeline)
 {
@@ -37,7 +40,7 @@ void WndTimeline::onTimeline()
 	if( !_checkCredentials() ) return;
 	_tipoReq = _TIPO_TIMELINE;
 	_setWaiting(true);
-	_twitter.getFriendsTimeline();
+	_twitter.getFriendsTimeline(MSG_COUNT);
 }
 
 void WndTimeline::onMentions()
@@ -45,7 +48,7 @@ void WndTimeline::onMentions()
 	if( !_checkCredentials() ) return;
 	_tipoReq = _TIPO_TIMELINE;
 	_setWaiting(true);
-	_twitter.getMentionsTimeline();
+	_twitter.getMentionsTimeline(MSG_COUNT);
 }
 
 void WndTimeline::onDirect()
@@ -53,7 +56,7 @@ void WndTimeline::onDirect()
 	if( !_checkCredentials() ) return;
 	_tipoReq = _TIPO_DIRECT;
 	_setWaiting(true);
-	_twitter.getDirectsTimeline();
+	_twitter.getDirectsTimeline(MSG_COUNT);
 }
 
 void WndTimeline::_setWaiting(bool waiting)
@@ -84,12 +87,13 @@ void WndTimeline::onFriendsTimeline(Timeline *timeline, int error)
 			ui->layTimeline->addWidget( fra );
 
 			//Link ---------------------------------------------------------
+			/*
 			QLabel *link = new QLabel(fra);
 			link->setObjectName("lblUser");
 			link->setText("<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> ");
 			connect(link, SIGNAL(linkActivated(QString)), this, SLOT(linkClicked(QString)));
 			fra->layout()->addWidget(link);
-
+			*/
 			//Text ---------------------------------------------------------
 			QLabel *lbl = new QLabel(ui->scrTimeline);
 			lbl->setObjectName("lblText");
@@ -110,12 +114,14 @@ void WndTimeline::onFriendsTimeline(Timeline *timeline, int error)
 
 			for( QObjectList::const_iterator it = list.constBegin(); it != list.constEnd(); it++ ) {
 				QObject* obj = *it;
-				if( obj->objectName() == "lblUser" ) {
+				/*if( obj->objectName() == "lblUser" ) {
 					QLabel *link = (QLabel *)obj;
-					link->setText("* <a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> ");
-				} else if( obj->objectName() == "lblText" ) {
+					link->setText("<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> ");
+				} else */
+				if( obj->objectName() == "lblText" ) {
 					QLabel *lbl = (QLabel *)obj;
-					lbl->setText( "# " + _changeLinks(text) );
+					lbl->setText( "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> " +
+								  _changeLinks(text) );
 				}
 			}
 
