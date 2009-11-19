@@ -43,8 +43,8 @@ private:
 
 private slots:
 	void on_actionSair_triggered();
- void on_actionConfigurar_triggered();
- void onTimeline();
+	void on_actionConfigurar_triggered();
+	void onTimeline();
 	void onMentions();
 	void onDirect();
 	void onFriendsTimeline(Timeline *timeLine, int error);
