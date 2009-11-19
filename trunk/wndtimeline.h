@@ -5,6 +5,7 @@
 #include <QFrame>
 
 #include "twitter.h"
+#include "Credentials.h"
 
 namespace Ui
 {
@@ -24,6 +25,8 @@ protected:
 	int _endTok(const QString &text, int pos);
 	void _setWaiting(bool waiting);
 
+	bool _checkCredentials();
+
 private:
 	enum TIPO_REQ {
 		_TIPO_NADA,
@@ -36,8 +39,12 @@ private:
 	QList< QFrame* > _frameList;
 	TIPO_REQ _tipoReq;
 
+	Credentials _credentials;
+
 private slots:
-	void onTimeline();
+	void on_actionSair_triggered();
+ void on_actionConfigurar_triggered();
+ void onTimeline();
 	void onMentions();
 	void onDirect();
 	void onFriendsTimeline(Timeline *timeLine, int error);

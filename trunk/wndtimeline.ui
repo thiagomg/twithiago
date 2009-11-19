@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>WndTimeline</string>
+   <string>Twithiago</string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -143,6 +143,15 @@ border-color: #696 #363 #363 #696;</string>
      <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu_Arquivo">
+    <property name="title">
+     <string>&amp;Arquivo</string>
+    </property>
+    <addaction name="actionConfigurar"/>
+    <addaction name="separator"/>
+    <addaction name="actionSair"/>
+   </widget>
+   <addaction name="menu_Arquivo"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -153,6 +162,16 @@ border-color: #696 #363 #363 #696;</string>
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionConfigurar">
+   <property name="text">
+    <string>&amp;Configurar</string>
+   </property>
+  </action>
+  <action name="actionSair">
+   <property name="text">
+    <string>Sai&amp;r</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
