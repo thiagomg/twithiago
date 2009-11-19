@@ -1,6 +1,9 @@
 #include "wndtimeline.h"
 #include "ui_wndtimeline.h"
 
+#include "frmconfig.h"
+#include "Config.h"
+
 #include <QMessageBox>
 #include <QLabel>
 #include <QCommandLinkButton>
@@ -15,12 +18,13 @@ WndTimeline::WndTimeline(QWidget *parent)
 	connect(ui->btnDirects, SIGNAL(clicked()), this, SLOT(onDirect()));
 	connect(&_twitter, SIGNAL(onFriendsTimeline(Timeline *, int)), this, SLOT(onFriendsTimeline(Timeline *, int)));
 
+	_credentials.loadConfig();
+
 	//If proxy
-	_twitter.setProxy("proxy_user", "proxy_pwd");
-	_twitter.setTwitterAccount("twitter_user", "twitter_pwd");
+	_twitter.setProxy( CONFIG.getProxyUsername(), CONFIG.getProxyPassword() );
+	_twitter.setTwitterAccount( _credentials.getUsername(), _credentials.getPassword() );
 
 	_tipoReq = _TIPO_NADA;
-
 }
 
 WndTimeline::~WndTimeline()
@@ -30,6 +34,7 @@ WndTimeline::~WndTimeline()
 
 void WndTimeline::onTimeline()
 {
+	if( !_checkCredentials() ) return;
 	_tipoReq = _TIPO_TIMELINE;
 	_setWaiting(true);
 	_twitter.getFriendsTimeline();
@@ -37,6 +42,7 @@ void WndTimeline::onTimeline()
 
 void WndTimeline::onMentions()
 {
+	if( !_checkCredentials() ) return;
 	_tipoReq = _TIPO_TIMELINE;
 	_setWaiting(true);
 	_twitter.getMentionsTimeline();
@@ -44,6 +50,7 @@ void WndTimeline::onMentions()
 
 void WndTimeline::onDirect()
 {
+	if( !_checkCredentials() ) return;
 	_tipoReq = _TIPO_DIRECT;
 	_setWaiting(true);
 	_twitter.getDirectsTimeline();
@@ -170,4 +177,26 @@ int WndTimeline::_endTok(const QString &text, int pos)
 		}
 	}
 	return i;
+}
+
+bool WndTimeline::_checkCredentials()
+{
+	if( !_credentials.hasUserSet() ) {
+		QMessageBox::critical(this, "Erro logando", "O usuário e senha do twitter<BR>não estão configurados");
+		return false;
+	}
+	return true;
+}
+
+void WndTimeline::on_actionConfigurar_triggered()
+{
+	FrmConfig cfg(this);
+	cfg.setModal(true);
+	cfg.exec();
+	_credentials.loadConfig();
+}
+
+void WndTimeline::on_actionSair_triggered()
+{
+	this->close();
 }

@@ -11,9 +11,16 @@ SOURCES += main.cpp \
     wndtimeline.cpp \
     twitter.cpp \
     friendlisthandler.cpp \
-    Timeline.cpp
+    Timeline.cpp \
+    Credentials.cpp \
+    Config.cpp \
+    frmconfig.cpp
 HEADERS += wndtimeline.h \
     twitter.h \
     friendlisthandler.h \
-    Timeline.h
-FORMS += wndtimeline.ui
+    Timeline.h \
+    Credentials.h \
+    Config.h \
+    frmconfig.h
+FORMS += wndtimeline.ui \
+    frmconfig.ui
