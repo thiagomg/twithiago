@@ -97,7 +97,8 @@ void WndTimeline::onFriendsTimeline(Timeline *timeline, int error)
 			//Text ---------------------------------------------------------
 			QLabel *lbl = new QLabel(ui->scrTimeline);
 			lbl->setObjectName("lblText");
-			lbl->setText( _changeLinks(text) );
+                        lbl->setText( "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> " +
+                                      _changeLinks(text) );
 			connect(lbl, SIGNAL(linkActivated(QString)), this, SLOT(linkClicked(QString)));
 			lbl->setWordWrap(true);
 			fra->layout()->addWidget(lbl);
