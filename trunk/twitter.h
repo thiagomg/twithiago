@@ -10,7 +10,9 @@ class Twitter : public QObject
 	Q_OBJECT
 
 public:
-	Twitter(QObject *parent = 0) {
+        Twitter(QObject *parent = 0) :
+                QObject(parent)
+        {
 		nam = new QNetworkAccessManager(this);
 
 		_timelineUrl = "http://twitter.com/statuses/friends_timeline.xml";
