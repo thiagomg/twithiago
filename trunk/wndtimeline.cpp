@@ -63,7 +63,7 @@ void WndTimeline::_setWaiting(bool waiting)
 {
 	if( waiting ) {
 		ui->statusBar->showMessage("Pegando mensagens");
-		ui->scrTimeline->setEnabled(false);
+                ui->scrTimeline->setEnabled(false);
 	} else {
 		ui->statusBar->clearMessage();
 		ui->scrTimeline->setEnabled(true);
@@ -188,7 +188,7 @@ int WndTimeline::_endTok(const QString &text, int pos)
 bool WndTimeline::_checkCredentials()
 {
 	if( !_credentials.hasUserSet() ) {
-		QMessageBox::critical(this, "Erro logando", "O usu·rio e senha do twitter<BR>n„o est„o configurados");
+		QMessageBox::critical(this, "Erro logando", "O usu√°rio e senha do twitter<BR>n√£o est√£o configurados");
 		return false;
 	}
 	return true;
