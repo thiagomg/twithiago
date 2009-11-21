@@ -53,7 +53,7 @@ bool Twitter::_getTimeline(const QString &url, int count)
 {
 	QString twitterUrl;
 
-	twitterUrl = url + QString("?count=%1").arg( 20 );
+        twitterUrl = url + QString("?count=%1").arg( count );
 
 	QUrl netUrl( url );
 
