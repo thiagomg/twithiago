@@ -27,6 +27,11 @@ protected:
 
 	bool _checkCredentials();
 
+	void _createItem(int pos, const QString &id, const QString &user, const QString &picUrl, const QString &text);
+	void _updateItem(int pos, const QString &id, const QString &user, const QString &picUrl, const QString &text);
+
+	const QImage *_getPicture(const QString &user, const QString &picUrl);
+
 private:
 	enum TIPO_REQ {
 		_TIPO_NADA,

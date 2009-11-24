@@ -77,59 +77,77 @@ void WndTimeline::onFriendsTimeline(Timeline *timeline, int error)
 	for(int i=0; i < timeline->getCount(); i++) {
 		const QString &text = timeline->getParam(i, "text");
 		const QString &user = timeline->getParam(i,_tipoReq==_TIPO_TIMELINE?"user_screen_name":"sender_screen_name");
+		const QString &id = timeline->getParam(i,"id");
+		const QString &picUrl = timeline->getParam(i,"user_profile_image_url");
 
 		if( (i+1) > _frameList.size() ) {
-			QFrame *fra = new QFrame(ui->scrTimeline);
-			_frameList.push_back(fra);
-			fra->setLayout( new QVBoxLayout() );
-			fra->layout()->setMargin(1);
-			fra->setStyleSheet("background-color: rgb(234, 255, 234);");
-			ui->layTimeline->addWidget( fra );
-
-			//Link ---------------------------------------------------------
-			/*
-			QLabel *link = new QLabel(fra);
-			link->setObjectName("lblUser");
-			link->setText("<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> ");
-			connect(link, SIGNAL(linkActivated(QString)), this, SLOT(linkClicked(QString)));
-			fra->layout()->addWidget(link);
-			*/
-			//Text ---------------------------------------------------------
-			QLabel *lbl = new QLabel(ui->scrTimeline);
-			lbl->setObjectName("lblText");
-                        lbl->setText( "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> " +
-                                      _changeLinks(text) );
-			connect(lbl, SIGNAL(linkActivated(QString)), this, SLOT(linkClicked(QString)));
-			lbl->setWordWrap(true);
-			fra->layout()->addWidget(lbl);
-
-			//Line ---------------------------------------------------------
-			QFrame *line = new QFrame(fra);
-			line->setObjectName(QString::fromUtf8("line"));
-			line->setFrameShape(QFrame::HLine);
-			line->setFrameShadow(QFrame::Plain);
-			fra->layout()->addWidget(line);
+			_createItem(i, id, user, picUrl, text);
 		} else {
-			QFrame *fra = _frameList.at(i);
-			const QObjectList &list = fra->children();
-
-			for( QObjectList::const_iterator it = list.constBegin(); it != list.constEnd(); it++ ) {
-				QObject* obj = *it;
-				/*if( obj->objectName() == "lblUser" ) {
-					QLabel *link = (QLabel *)obj;
-					link->setText("<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> ");
-				} else */
-				if( obj->objectName() == "lblText" ) {
-					QLabel *lbl = (QLabel *)obj;
-					lbl->setText( "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> " +
-								  _changeLinks(text) );
-				}
-			}
+			_updateItem(i, id, user, picUrl, text);
 
 		}
 
 	}
 	_setWaiting(false);
+}
+
+void WndTimeline::_createItem(int pos, const QString &id, const QString &user, const QString &picUrl, const QString &text)
+{
+	QFrame *fra = new QFrame(ui->scrTimeline);
+	_frameList.push_back(fra);
+	fra->setLayout( new QVBoxLayout() );
+	fra->layout()->setMargin(1);
+	fra->setStyleSheet("background-color: rgb(234, 255, 234);");
+	ui->layTimeline->addWidget( fra );
+
+	//Text ---------------------------------------------------------
+	QLabel *lbl = new QLabel(ui->scrTimeline);
+	lbl->setObjectName("lblText");
+
+	QString itemText = "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> ";
+	itemText.append( _changeLinks(text) );
+	itemText.append("<BR>");
+	itemText.append("<a href=\"@@" + id);
+	itemText.append("\">Reply</a> - <a href=\"##" + QString::number(pos) + "\">Retweet</a>");
+
+	//TODO: Criar layout, colocar no layout e caso NULL, colocar imagem vazia.
+	//      Fazer tb slot de imagem
+	const QImage *img = _getPicture(user, picUrl);
+	if( img != NULL ) {
+		//Colocar
+	}
+
+	lbl->setText( itemText );
+	connect(lbl, SIGNAL(linkActivated(QString)), this, SLOT(linkClicked(QString)));
+	lbl->setWordWrap(true);
+	fra->layout()->addWidget(lbl);
+
+	//Line ---------------------------------------------------------
+	QFrame *line = new QFrame(fra);
+	line->setObjectName(QString::fromUtf8("line"));
+	line->setFrameShape(QFrame::HLine);
+	line->setFrameShadow(QFrame::Plain);
+	fra->layout()->addWidget(line);
+}
+
+void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, const QString &picUrl, const QString &text)
+{
+	QFrame *fra = _frameList.at(pos);
+	const QObjectList &list = fra->children();
+
+	for( QObjectList::const_iterator it = list.constBegin(); it != list.constEnd(); it++ ) {
+		QObject* obj = *it;
+		if( obj->objectName() == "lblText" ) {
+			QLabel *lbl = (QLabel *)obj;
+			lbl->setText( "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> " +
+						  _changeLinks(text) );
+		}
+	}
+}
+
+const QImage *WndTimeline::_getPicture(const QString &user, const QString &picUrl)
+{
+	return _twitter.getPicture(user, picUrl);
 }
 
 void WndTimeline::linkClicked(QString desc)
