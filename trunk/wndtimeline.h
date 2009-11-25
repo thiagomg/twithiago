@@ -53,6 +53,7 @@ private slots:
 	void onMentions();
 	void onDirect();
 	void onFriendsTimeline(Timeline *timeLine, int error);
+	void onFriendPicture(const QTwitPicture &pic);
 
 	void linkClicked(QString desc);
 

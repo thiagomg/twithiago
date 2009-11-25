@@ -14,13 +14,15 @@ SOURCES += main.cpp \
     Timeline.cpp \
     Credentials.cpp \
     Config.cpp \
-    frmconfig.cpp
+    frmconfig.cpp \
+    QTwitPicture.cpp
 HEADERS += wndtimeline.h \
     twitter.h \
     friendlisthandler.h \
     Timeline.h \
     Credentials.h \
     Config.h \
-    frmconfig.h
+    frmconfig.h \
+    QTwitPicture.h
 FORMS += wndtimeline.ui \
     frmconfig.ui

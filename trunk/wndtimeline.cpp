@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QLabel>
 #include <QCommandLinkButton>
+#include <QFormLayout>
 
 //TODO: pass to config
 #define MSG_COUNT 50
@@ -20,6 +21,7 @@ WndTimeline::WndTimeline(QWidget *parent)
 	connect(ui->btnMentions, SIGNAL(clicked()), this, SLOT(onMentions()));
 	connect(ui->btnDirects, SIGNAL(clicked()), this, SLOT(onDirect()));
 	connect(&_twitter, SIGNAL(onFriendsTimeline(Timeline *, int)), this, SLOT(onFriendsTimeline(Timeline *, int)));
+	connect(&_twitter, SIGNAL(onFriendPicture(QTwitPicture)), this, SLOT(onFriendPicture(QTwitPicture)));
 
 	_credentials.loadConfig();
 
@@ -95,10 +97,14 @@ void WndTimeline::_createItem(int pos, const QString &id, const QString &user, c
 {
 	QFrame *fra = new QFrame(ui->scrTimeline);
 	_frameList.push_back(fra);
-	fra->setLayout( new QVBoxLayout() );
+	QVBoxLayout *mainLay = new QVBoxLayout();
+	fra->setLayout( mainLay );
 	fra->layout()->setMargin(1);
+	fra->layout()->setSizeConstraint(QLayout::SetMinimumSize);
 	fra->setStyleSheet("background-color: rgb(234, 255, 234);");
 	ui->layTimeline->addWidget( fra );
+
+	QFormLayout *layText = new QFormLayout( fra );
 
 	//Text ---------------------------------------------------------
 	QLabel *lbl = new QLabel(ui->scrTimeline);
@@ -109,18 +115,33 @@ void WndTimeline::_createItem(int pos, const QString &id, const QString &user, c
 	itemText.append("<BR>");
 	itemText.append("<a href=\"@@" + id);
 	itemText.append("\">Reply</a> - <a href=\"##" + QString::number(pos) + "\">Retweet</a>");
+	lbl->setText( itemText );
 
-	//TODO: Criar layout, colocar no layout e caso NULL, colocar imagem vazia.
-	//      Fazer tb slot de imagem
+	QLabel *lblImg = new QLabel(ui->scrTimeline);
+	lblImg->setObjectName("lblImg");
+	lblImg->setToolTip(user);
+	lblImg->setBackgroundRole(QPalette::Base);
+	//lblImg->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+	lblImg->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+	lblImg->setScaledContents(true);
+	lblImg->resize(48, 48);
+
+	//TODO: caso NULL, colocar imagem vazia.
 	const QImage *img = _getPicture(user, picUrl);
 	if( img != NULL ) {
-		//Colocar
+		lblImg->setPixmap( QPixmap::fromImage(*img) );
+		lblImg->resize(lblImg->pixmap()->size());
 	}
 
-	lbl->setText( itemText );
 	connect(lbl, SIGNAL(linkActivated(QString)), this, SLOT(linkClicked(QString)));
 	lbl->setWordWrap(true);
-	fra->layout()->addWidget(lbl);
+
+	//QSpacerItem *s1 = new QSpacerItem(48, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
+	//QSpacerItem *s2 = new QSpacerItem(10, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
+	//layText->addItem(s1);
+	layText->addRow(lblImg, lbl);
+
+	mainLay->addLayout(layText);
 
 	//Line ---------------------------------------------------------
 	QFrame *line = new QFrame(fra);
@@ -135,12 +156,24 @@ void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, c
 	QFrame *fra = _frameList.at(pos);
 	const QObjectList &list = fra->children();
 
+	const QImage *img = _getPicture(user, picUrl);
+
 	for( QObjectList::const_iterator it = list.constBegin(); it != list.constEnd(); it++ ) {
 		QObject* obj = *it;
 		if( obj->objectName() == "lblText" ) {
 			QLabel *lbl = (QLabel *)obj;
 			lbl->setText( "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> " +
 						  _changeLinks(text) );
+		} else if( obj->objectName() == "lblImg" ) {
+			if( img != NULL ) {
+				QLabel *lblImg = (QLabel *)obj;
+				lblImg->setPixmap( QPixmap::fromImage( img->scaled(48, 48, Qt::IgnoreAspectRatio) ) );
+				//QSize size = lblImg->pixmap()->size();
+				QSize size;
+				size.setHeight(48); size.setWidth(48);
+
+				lblImg->resize(size);
+			}
 		}
 	}
 }
@@ -207,10 +240,34 @@ int WndTimeline::_endTok(const QString &text, int pos)
 bool WndTimeline::_checkCredentials()
 {
 	if( !_credentials.hasUserSet() ) {
-		QMessageBox::critical(this, "Erro logando", "O usuário e senha do twitter<BR>não estão configurados");
+		QMessageBox::critical(this, tr("Erro logando"), tr("O usuário e senha do twitter<BR>nÃ£o estÃ£o configurados"));
 		return false;
 	}
 	return true;
+}
+
+void WndTimeline::onFriendPicture(const QTwitPicture &pic)
+{
+	qDebug() << "CHEGOU IMG " << pic.getUsername();
+	QList< QFrame* >::iterator itf = _frameList.begin();
+
+	for(; itf != _frameList.end(); itf++) {
+		QFrame *fra = *itf;
+
+		const QObjectList &list = fra->children();
+		for( QObjectList::const_iterator it = list.constBegin(); it != list.constEnd(); it++ ) {
+			QObject* obj = *it;
+			if( obj->objectName() == "lblImg" ) {
+				QLabel *lblImg = (QLabel *)obj;
+				QString user = (QString)lblImg->toolTip();
+				if( user == pic.getUsername() ) {
+					lblImg->setPixmap( QPixmap::fromImage(pic) );
+					lblImg->resize(48, 48);
+					lblImg->setScaledContents(true);
+				}
+			}
+		}
+	}//framelist
 }
 
 void WndTimeline::on_actionConfigurar_triggered()

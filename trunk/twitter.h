@@ -3,6 +3,7 @@
 #include <QtNetwork>
 #include <QObject>
 #include <QImage>
+#include "QTwitPicture.h"
 
 #include "Timeline.h"
 
@@ -31,7 +32,7 @@ public:
 	bool getFriendsTimeline(int count=20);
 	bool getMentionsTimeline(int count=20);
 	bool getDirectsTimeline(int count=20);
-	const QImage *getPicture(const QString &userName, const QString &url);
+	const QTwitPicture *getPicture(const QString &userName, const QString &url);
 	bool postUpdate(const QString &data, quint64 inReplyTo);
 
 protected:
@@ -44,7 +45,7 @@ protected:
 signals:
 	void onFriendsTimelineXML(const QString &timeLine, int error);
 	void onFriendsTimeline(Timeline *timeLine, int error);
-	void onFriendPicture(const QString &user, const QImage &img);
+	void onFriendPicture(const QTwitPicture &img);
 
 private slots:
 	void onNetRecv(QNetworkReply *reply);
@@ -54,8 +55,8 @@ private:
 	static const QNetworkRequest::Attribute ATTR_PIC_URL = (QNetworkRequest::Attribute)(QNetworkRequest::User+2);
 	static const QNetworkRequest::Attribute ATTR_USER = (QNetworkRequest::Attribute)(QNetworkRequest::User+3);
 
-	enum {
-		_attr_timeline,
+	enum AttrType {
+		_attr_timeline = 101,
 		_attr_update,
 		_attr_picture
 	};
@@ -72,7 +73,7 @@ private:
 	QString _twitterUser;
 	QString _twitterPwd;
 
-	QMap<QString, QImage> _mapPics;
+	QMap<QString, QTwitPicture> _mapPics;
 
 };
 
