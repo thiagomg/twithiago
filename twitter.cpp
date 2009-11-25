@@ -2,6 +2,7 @@
 
 #include <QXmlSimpleReader>
 #include <QBuffer>
+#include <QMessageBox>
 
 #include "friendlisthandler.h"
 
@@ -68,9 +69,9 @@ bool Twitter::_getTimeline(const QString &url, int count)
 	auth = auth.toBase64().prepend( "Basic " );
 
 	request.setRawHeader( "Authorization", auth );
-	request.setAttribute( ATTR_TIPO, _attr_timeline );
+	request.setAttribute( ATTR_TIPO, 101 );
 
-	nam->get(request);
+	QNetworkReply *reply = nam->get(request);
 
 	return true;
 }
@@ -102,46 +103,49 @@ bool Twitter::postUpdate(const QString &data, quint64 inReplyTo)
 	}
 	postData.append( "&source=Twithiago" );
 
-	request.setAttribute( ATTR_TIPO, _attr_update );
+	request.setAttribute( ATTR_TIPO, 102 );
 
-	nam->post(request, postData);
+	QNetworkReply *reply = nam->post(request, postData);
 
 	return true;
 }
 
 
-const QImage *Twitter::getPicture(const QString &userName, const QString &url)
+const QTwitPicture *Twitter::getPicture(const QString &userName, const QString &url)
 {
 	QUrl netUrl( url );
 
-	QMap<QString, QImage>::iterator it = _mapPics.find( netUrl.toString(QUrl::None) );
+	QString urlImg = netUrl.toString(QUrl::None);
+	QMap<QString, QTwitPicture>::iterator it = _mapPics.find( urlImg );
 	if( it != _mapPics.end() ) {
-		QImage &img = *it;
-		return &img;
+		QTwitPicture &pic = *it;
+		return &pic;
+	} else {
+		QTwitPicture pic;
+		pic.setUsername(userName);
+		_mapPics.insert(url, pic);
 	}
 
 	_checkProxy(netUrl); //Use proxy ?
 
 	QNetworkRequest request(netUrl);
-	request.setAttribute( ATTR_TIPO, _attr_picture );
-	request.setAttribute( ATTR_PIC_URL, url );
-	request.setAttribute( ATTR_USER, userName );
-	
-	nam->get(request);
+	request.setAttribute( ATTR_TIPO, 103 );
+
+	QNetworkReply *reply = nam->get(request);
+	//reply->deleteLater();
 
 	return NULL;
 }
 
 void Twitter::onNetRecv(QNetworkReply *reply)
 {
-	int tipo = reply->attribute( ATTR_TIPO ).toInt();
-	switch( tipo ) {
-	case _attr_timeline:
+	QString url = reply->url().toString(QUrl::None);
+	qDebug() << url;
+
+	if( url.contains(_timelineUrl) || url.contains(_mentionsUrl) || url.contains(_directsUrl) ) {
 		_processTimeline(reply);
-		break;
-	case _attr_picture:
+	} else if( url.endsWith(".jpg") || url.endsWith(".png")  || url.endsWith(".gif") ) {
 		_processPictures(reply);
-		break;
 	}
 }
 
@@ -178,22 +182,22 @@ void Twitter::_processTimeline(QNetworkReply *reply)
 
 void Twitter::_processPictures(QNetworkReply *reply)
 {
-	QString userName = reply->attribute( ATTR_USER ).toString();
-
 	QString url = reply->url().toString(QUrl::None);
 	qDebug() << "URL: " << url;
 
-	QMap<QString, QImage>::iterator it = _mapPics.find(url);
-	if( it != _mapPics.end() ) {
-		//already there
+	QMap<QString, QTwitPicture>::iterator it = _mapPics.find(url);
+	if( it == _mapPics.end() ) {
+		//Error!!!!!
+		QMessageBox::critical(NULL, "Erro", "Erro relacionando imagem");
 		return;
 	}
 
-	QImage img;
-	it = _mapPics.insert( url, img );
+	QTwitPicture &img = it.value();
+	bool ret = img.loadFromData( reply->readAll() );
 
-	QImage &imgIns = *it;
-	imgIns.loadFromData( reply->readAll() );
+	if( !ret ) {
+		QMessageBox::critical(NULL, "Erro carregando imagem", "Erro carregando imagem " + url);
+	}
 
-	emit onFriendPicture(userName, imgIns);
+	emit onFriendPicture(img);
 }

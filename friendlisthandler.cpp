@@ -62,7 +62,7 @@ bool FriendListHandler::characters(const QString& ch)
 
 bool FriendListHandler::endDocument()
 {
-	_timeline->dump();
+	//_timeline->dump();
 
 	return true;
 }
