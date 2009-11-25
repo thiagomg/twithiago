@@ -197,7 +197,8 @@ void Twitter::_processPictures(QNetworkReply *reply)
 
 	if( !ret ) {
 		QMessageBox::critical(NULL, "Erro carregando imagem", "Erro carregando imagem " + url);
+	} else {
+		img = img.resize();
+		emit onFriendPicture(img);
 	}
-
-	emit onFriendPicture(img);
 }

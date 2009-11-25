@@ -121,24 +121,17 @@ void WndTimeline::_createItem(int pos, const QString &id, const QString &user, c
 	lblImg->setObjectName("lblImg");
 	lblImg->setToolTip(user);
 	lblImg->setBackgroundRole(QPalette::Base);
-	//lblImg->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 	lblImg->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-	lblImg->setScaledContents(true);
 	lblImg->resize(48, 48);
 
-	//TODO: caso NULL, colocar imagem vazia.
 	const QImage *img = _getPicture(user, picUrl);
 	if( img != NULL ) {
 		lblImg->setPixmap( QPixmap::fromImage(*img) );
-		lblImg->resize(lblImg->pixmap()->size());
 	}
 
 	connect(lbl, SIGNAL(linkActivated(QString)), this, SLOT(linkClicked(QString)));
 	lbl->setWordWrap(true);
 
-	//QSpacerItem *s1 = new QSpacerItem(48, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
-	//QSpacerItem *s2 = new QSpacerItem(10, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
-	//layText->addItem(s1);
 	layText->addRow(lblImg, lbl);
 
 	mainLay->addLayout(layText);
@@ -167,12 +160,8 @@ void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, c
 		} else if( obj->objectName() == "lblImg" ) {
 			if( img != NULL ) {
 				QLabel *lblImg = (QLabel *)obj;
-				lblImg->setPixmap( QPixmap::fromImage( img->scaled(48, 48, Qt::IgnoreAspectRatio) ) );
-				//QSize size = lblImg->pixmap()->size();
-				QSize size;
-				size.setHeight(48); size.setWidth(48);
-
-				lblImg->resize(size);
+				lblImg->resize(48, 48);
+				lblImg->setPixmap( QPixmap::fromImage(*img) );
 			}
 		}
 	}
@@ -263,7 +252,7 @@ void WndTimeline::onFriendPicture(const QTwitPicture &pic)
 				if( user == pic.getUsername() ) {
 					lblImg->setPixmap( QPixmap::fromImage(pic) );
 					lblImg->resize(48, 48);
-					lblImg->setScaledContents(true);
+					//lblImg->setScaledContents(true);
 				}
 			}
 		}
