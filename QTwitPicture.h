@@ -7,9 +7,12 @@ class QTwitPicture : public QImage
 {
 public:
     QTwitPicture();
+	QTwitPicture(const QImage &img);
 
 	void setUsername(const QString &username);
 	const QString &getUsername() const;
+
+	QTwitPicture resize();
 
 private:
 	QString _username;
