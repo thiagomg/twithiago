@@ -80,7 +80,7 @@ void WndTimeline::onFriendsTimeline(Timeline *timeline, int error)
 		const QString &text = timeline->getParam(i, "text");
 		const QString &user = timeline->getParam(i,_tipoReq==_TIPO_TIMELINE?"user_screen_name":"sender_screen_name");
 		const QString &id = timeline->getParam(i,"id");
-		const QString &picUrl = timeline->getParam(i,"user_profile_image_url");
+		const QString &picUrl = timeline->getParam(i,_tipoReq==_TIPO_TIMELINE?"user_profile_image_url":"sender_profile_image_url");
 
 		if( (i+1) > _frameList.size() ) {
 			_createItem(i, id, user, picUrl, text);
@@ -149,7 +149,10 @@ void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, c
 	QFrame *fra = _frameList.at(pos);
 	const QObjectList &list = fra->children();
 
-	const QImage *img = _getPicture(user, picUrl);
+	const QImage *img = NULL;
+	if( picUrl.size() > 0 ) {
+		img = _getPicture(user, picUrl);
+	}
 
 	for( QObjectList::const_iterator it = list.constBegin(); it != list.constEnd(); it++ ) {
 		QObject* obj = *it;
@@ -158,10 +161,13 @@ void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, c
 			lbl->setText( "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> " +
 						  _changeLinks(text) );
 		} else if( obj->objectName() == "lblImg" ) {
+			QLabel *lblImg = (QLabel *)obj;
 			if( img != NULL ) {
-				QLabel *lblImg = (QLabel *)obj;
 				lblImg->resize(48, 48);
 				lblImg->setPixmap( QPixmap::fromImage(*img) );
+			} else {
+				lblImg->setText("");
+				lblImg->clear();
 			}
 		}
 	}
