@@ -112,7 +112,7 @@ void WndTimeline::_createItem(int pos, const QString &id, const QString &user, c
 	fra->setStyleSheet("background-color: rgb(234, 255, 234);");
 	ui->layTimeline->addWidget( fra );
 
-	QFormLayout *layText = new QFormLayout( fra );
+	QFormLayout *layText = new QFormLayout( NULL );
 
 	//Text ---------------------------------------------------------
 	QLabel *lbl = new QLabel(ui->scrTimeline);
