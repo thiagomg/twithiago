@@ -71,7 +71,7 @@ bool Twitter::_getTimeline(const QString &url, int count)
 	request.setRawHeader( "Authorization", auth );
 	request.setAttribute( ATTR_TIPO, 101 );
 
-	QNetworkReply *reply = nam->get(request);
+	nam->get(request);
 
 	return true;
 }
@@ -105,7 +105,7 @@ bool Twitter::postUpdate(const QString &data, quint64 inReplyTo)
 
 	request.setAttribute( ATTR_TIPO, 102 );
 
-	QNetworkReply *reply = nam->post(request, postData);
+	nam->post(request, postData);
 
 	return true;
 }
@@ -131,8 +131,7 @@ const QTwitPicture *Twitter::getPicture(const QString &userName, const QString &
 	QNetworkRequest request(netUrl);
 	request.setAttribute( ATTR_TIPO, 103 );
 
-	QNetworkReply *reply = nam->get(request);
-	//reply->deleteLater();
+	nam->get(request);
 
 	return NULL;
 }
@@ -146,6 +145,8 @@ void Twitter::onNetRecv(QNetworkReply *reply)
 		_processTimeline(reply);
 	} else if( url.endsWith(".jpg") || url.endsWith(".png")  || url.endsWith(".gif") ) {
 		_processPictures(reply);
+	} else if( url.contains(_updateUrl) ) {
+		_processUpdate(reply);
 	}
 }
 
@@ -200,5 +201,31 @@ void Twitter::_processPictures(QNetworkReply *reply)
 	} else {
 		img = img.resize();
 		emit onFriendPicture(img);
+	}
+}
+
+void Twitter::_processUpdate(QNetworkReply *reply)
+{
+	QString url = reply->url().toString(QUrl::None);
+	qDebug() << "URL: " << url;
+
+	if (reply->error() == QNetworkReply::NoError)
+	{
+		QByteArray bytes = reply->readAll();
+		QString s(bytes);
+		qDebug() << s;
+		QXmlSimpleReader reader;
+		QBuffer buffer(&bytes);
+		QXmlInputSource input( &buffer );
+		FriendListHandler handler;
+		reader.setContentHandler(&handler);
+		reader.setFeature("http://trolltech.com/xml/features/report-whitespace-only-CharData", false);
+		reader.parse(&input);
+
+		emit onUpdate(handler.getTimeline(), 0 );
+	}
+	else
+	{
+		emit onUpdate(NULL, reply->error());
 	}
 }

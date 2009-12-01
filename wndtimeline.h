@@ -39,6 +39,14 @@ private:
 		_TIPO_DIRECT
 	};
 
+	enum TELA_ATUAL {
+		_TELA_NADA,
+		_TELA_TIMELINE,
+		_TELA_MENTIONS,
+		_TELA_DIRECT,
+		_TELA_USER
+	};
+
     Ui::WndTimeline *ui;
 	Twitter _twitter;
 	QList< QFrame* > _frameList;
@@ -46,7 +54,11 @@ private:
 
 	Credentials _credentials;
 
+	int _telaAtual;
+	int _inReplyTo;
+
 private slots:
+	void on_actionUpdate_triggered();
 	void on_actionSair_triggered();
 	void on_actionConfigurar_triggered();
 	void onTimeline();
@@ -54,6 +66,8 @@ private slots:
 	void onDirect();
 	void onFriendsTimeline(Timeline *timeLine, int error);
 	void onFriendPicture(const QTwitPicture &pic);
+	void onUpdatePressed();
+	void onUpdate(Timeline *timeLine, int error);
 
 	void linkClicked(QString desc);
 
