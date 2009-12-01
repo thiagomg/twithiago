@@ -41,11 +41,13 @@ protected:
 
 	void _processTimeline(QNetworkReply *reply);
 	void _processPictures(QNetworkReply *reply);
+	void _processUpdate(QNetworkReply *reply);
 
 signals:
 	void onFriendsTimelineXML(const QString &timeLine, int error);
 	void onFriendsTimeline(Timeline *timeLine, int error);
 	void onFriendPicture(const QTwitPicture &img);
+	void onUpdate(Timeline *timeLine, int error);
 
 private slots:
 	void onNetRecv(QNetworkReply *reply);

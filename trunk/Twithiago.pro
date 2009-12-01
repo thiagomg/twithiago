@@ -23,6 +23,7 @@ HEADERS += wndtimeline.h \
     Credentials.h \
     Config.h \
     frmconfig.h \
-    QTwitPicture.h
+    QTwitPicture.h \
+    TextUpdate.h
 FORMS += wndtimeline.ui \
     frmconfig.ui

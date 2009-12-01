@@ -22,7 +22,8 @@ WndTimeline::WndTimeline(QWidget *parent)
 	connect(ui->btnDirects, SIGNAL(clicked()), this, SLOT(onDirect()));
 	connect(&_twitter, SIGNAL(onFriendsTimeline(Timeline *, int)), this, SLOT(onFriendsTimeline(Timeline *, int)));
 	connect(&_twitter, SIGNAL(onFriendPicture(QTwitPicture)), this, SLOT(onFriendPicture(QTwitPicture)));
-
+	connect(&_twitter, SIGNAL(onUpdate(Timeline*,int)), this, SLOT(onUpdate(Timeline*,int)));
+	connect(ui->txtUpdate, SIGNAL(submit()), this, SLOT(onUpdatePressed()));
 	_credentials.loadConfig();
 
 	//If proxy
@@ -30,6 +31,10 @@ WndTimeline::WndTimeline(QWidget *parent)
 	_twitter.setTwitterAccount( _credentials.getUsername(), _credentials.getPassword() );
 
 	_tipoReq = _TIPO_NADA;
+	ui->fraUpdate->setVisible(false);
+	_inReplyTo = 0;
+	_telaAtual = _TELA_NADA;
+
 }
 
 WndTimeline::~WndTimeline()
@@ -41,6 +46,7 @@ void WndTimeline::onTimeline()
 {
 	if( !_checkCredentials() ) return;
 	_tipoReq = _TIPO_TIMELINE;
+	_telaAtual = _TELA_TIMELINE;
 	_setWaiting(true);
 	_twitter.getFriendsTimeline(MSG_COUNT);
 }
@@ -49,6 +55,7 @@ void WndTimeline::onMentions()
 {
 	if( !_checkCredentials() ) return;
 	_tipoReq = _TIPO_TIMELINE;
+	_telaAtual = _TELA_MENTIONS;
 	_setWaiting(true);
 	_twitter.getMentionsTimeline(MSG_COUNT);
 }
@@ -57,6 +64,7 @@ void WndTimeline::onDirect()
 {
 	if( !_checkCredentials() ) return;
 	_tipoReq = _TIPO_DIRECT;
+	_telaAtual = _TELA_DIRECT;
 	_setWaiting(true);
 	_twitter.getDirectsTimeline(MSG_COUNT);
 }
@@ -122,7 +130,7 @@ void WndTimeline::_createItem(int pos, const QString &id, const QString &user, c
 	lblImg->setToolTip(user);
 	lblImg->setBackgroundRole(QPalette::Base);
 	lblImg->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-	lblImg->resize(48, 48);
+	lblImg->setFixedSize(48, 48);
 
 	const QImage *img = _getPicture(user, picUrl);
 	if( img != NULL ) {
@@ -163,7 +171,7 @@ void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, c
 		} else if( obj->objectName() == "lblImg" ) {
 			QLabel *lblImg = (QLabel *)obj;
 			if( img != NULL ) {
-				lblImg->resize(48, 48);
+				lblImg->setFixedSize(48, 48);
 				lblImg->setPixmap( QPixmap::fromImage(*img) );
 			} else {
 				lblImg->setText("");
@@ -257,7 +265,7 @@ void WndTimeline::onFriendPicture(const QTwitPicture &pic)
 				QString user = (QString)lblImg->toolTip();
 				if( user == pic.getUsername() ) {
 					lblImg->setPixmap( QPixmap::fromImage(pic) );
-					lblImg->resize(48, 48);
+					lblImg->setFixedSize(48, 48);
 					//lblImg->setScaledContents(true);
 				}
 			}
@@ -276,4 +284,44 @@ void WndTimeline::on_actionConfigurar_triggered()
 void WndTimeline::on_actionSair_triggered()
 {
 	this->close();
+}
+
+void WndTimeline::on_actionUpdate_triggered()
+{
+	if( ui->fraUpdate->isVisible() ) {
+		ui->fraUpdate->setVisible(false);
+	} else {
+		ui->fraUpdate->setVisible(true);
+		ui->txtUpdate->setFocus();
+	}
+}
+
+void WndTimeline::onUpdatePressed()
+{
+	QString text = ui->txtUpdate->toPlainText();
+	if( text.size() > 0 ) {
+		ui->txtUpdate->setEnabled(false);
+		_twitter.postUpdate( text, _inReplyTo );
+	}
+}
+
+void WndTimeline::onUpdate(Timeline *timeLine, int error)
+{
+	ui->txtUpdate->clear();
+	ui->statusBar->showMessage("Update feito com sucesso!", 2000);
+	ui->txtUpdate->setEnabled(true);
+	ui->fraUpdate->setVisible(false);
+
+	switch( _telaAtual ) {
+ case _TELA_TIMELINE:
+		onTimeline();
+		break;
+ case _TELA_MENTIONS:
+		onMentions();
+		break;
+ case _TELA_DIRECT:
+		onDirect();
+		break;
+	}
+
 }
