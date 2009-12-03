@@ -31,6 +31,11 @@ protected:
 	void _updateItem(int pos, const QString &id, const QString &user, const QString &picUrl, const QString &text);
 
 	const QImage *_getPicture(const QString &user, const QString &picUrl);
+	void _showUpdate();
+
+	//Parsers --------------------------------------------
+	QString _parseReply(const QString &cmd);
+	//====================================================
 
 private:
 	enum TIPO_REQ {
