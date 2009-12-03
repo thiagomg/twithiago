@@ -121,7 +121,7 @@ void WndTimeline::_createItem(int pos, const QString &id, const QString &user, c
 	QString itemText = "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> ";
 	itemText.append( _changeLinks(text) );
 	itemText.append("<BR>");
-	itemText.append("<a href=\"@@" + id);
+	itemText.append("<a href=\"@@" + id + "|" + user);
 	itemText.append("\">Reply</a> - <a href=\"##" + QString::number(pos) + "\">Retweet</a>");
 	lbl->setText( itemText );
 
@@ -188,7 +188,52 @@ const QImage *WndTimeline::_getPicture(const QString &user, const QString &picUr
 
 void WndTimeline::linkClicked(QString desc)
 {
-	QMessageBox::information(this, "link", desc);
+	QString ret;
+
+	if( desc.startsWith("@@") ) {
+		//Reply
+		ret = _parseReply(desc);
+	} else {
+		QMessageBox::information(this, "link", desc);
+	}
+
+	if( ret.size() > 0 ) {
+		_showUpdate();
+		ui->txtUpdate->setPlainText(ret);
+		QTextCursor cursor = ui->txtUpdate->textCursor();
+		cursor.setPosition(ret.size());
+		ui->txtUpdate->setTextCursor(cursor);
+	}
+
+}
+
+QString WndTimeline::_parseReply(const QString &cmd)
+{
+	QStringList ret;
+
+	QStringList params = cmd.split("|");
+	if( params.size() != 2 ) {
+		QMessageBox::critical(this, "Erro", "Erro em reply");
+		return "";
+	}
+
+	int id=0;
+	const QString &sId = params[0];
+	if( sId.size() > 2 ) {
+		QString s = sId.mid(2);
+		id = s.toInt();
+	}
+
+
+	if( params[1].size() > 0 ) {
+		ret << "@" << params[1] << " ";
+
+		if( id > 0 ) _inReplyTo = id;
+
+	}
+
+	return ret.join("");
+
 }
 
 QString WndTimeline::_changeLinks(const QString &text)
@@ -291,9 +336,14 @@ void WndTimeline::on_actionUpdate_triggered()
 	if( ui->fraUpdate->isVisible() ) {
 		ui->fraUpdate->setVisible(false);
 	} else {
-		ui->fraUpdate->setVisible(true);
-		ui->txtUpdate->setFocus();
+		_showUpdate();
 	}
+}
+
+void WndTimeline::_showUpdate()
+{
+	ui->fraUpdate->setVisible(true);
+	ui->txtUpdate->setFocus();
 }
 
 void WndTimeline::onUpdatePressed()
@@ -302,6 +352,7 @@ void WndTimeline::onUpdatePressed()
 	if( text.size() > 0 ) {
 		ui->txtUpdate->setEnabled(false);
 		_twitter.postUpdate( text, _inReplyTo );
+		_inReplyTo = 0;
 	}
 }
 
