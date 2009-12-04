@@ -213,7 +213,6 @@ void Twitter::_processUpdate(QNetworkReply *reply)
 	{
 		QByteArray bytes = reply->readAll();
 		QString s(bytes);
-		qDebug() << s;
 		QXmlSimpleReader reader;
 		QBuffer buffer(&bytes);
 		QXmlInputSource input( &buffer );

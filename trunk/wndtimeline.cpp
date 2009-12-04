@@ -9,6 +9,8 @@
 #include <QCommandLinkButton>
 #include <QFormLayout>
 
+#include <QDesktopServices>
+
 //TODO: pass to config
 #define MSG_COUNT 50
 
@@ -24,6 +26,7 @@ WndTimeline::WndTimeline(QWidget *parent)
 	connect(&_twitter, SIGNAL(onFriendPicture(QTwitPicture)), this, SLOT(onFriendPicture(QTwitPicture)));
 	connect(&_twitter, SIGNAL(onUpdate(Timeline*,int)), this, SLOT(onUpdate(Timeline*,int)));
 	connect(ui->txtUpdate, SIGNAL(submit()), this, SLOT(onUpdatePressed()));
+	connect(ui->txtUpdate, SIGNAL(cancel()), this, SLOT(onCancelPressed()));
 	_credentials.loadConfig();
 
 	//If proxy
@@ -42,12 +45,22 @@ WndTimeline::~WndTimeline()
 	delete ui;
 }
 
+void WndTimeline::_checkMsgList()
+{
+	if( _msgList.size() < MSG_COUNT ) {
+		for(int i= _msgList.size(); i < MSG_COUNT; i++) {
+			_msgList.append("");
+		}
+	}
+}
+
 void WndTimeline::onTimeline()
 {
 	if( !_checkCredentials() ) return;
 	_tipoReq = _TIPO_TIMELINE;
 	_telaAtual = _TELA_TIMELINE;
 	_setWaiting(true);
+	_checkMsgList();
 	_twitter.getFriendsTimeline(MSG_COUNT);
 }
 
@@ -57,6 +70,7 @@ void WndTimeline::onMentions()
 	_tipoReq = _TIPO_TIMELINE;
 	_telaAtual = _TELA_MENTIONS;
 	_setWaiting(true);
+	_checkMsgList();
 	_twitter.getMentionsTimeline(MSG_COUNT);
 }
 
@@ -66,6 +80,7 @@ void WndTimeline::onDirect()
 	_tipoReq = _TIPO_DIRECT;
 	_telaAtual = _TELA_DIRECT;
 	_setWaiting(true);
+	_checkMsgList();
 	_twitter.getDirectsTimeline(MSG_COUNT);
 }
 
@@ -118,6 +133,9 @@ void WndTimeline::_createItem(int pos, const QString &id, const QString &user, c
 	QLabel *lbl = new QLabel(ui->scrTimeline);
 	lbl->setObjectName("lblText");
 
+	//Setting text to RT
+	_msgList[pos] = user + " " + text;
+
 	QString itemText = "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> ";
 	itemText.append( _changeLinks(text) );
 	itemText.append("<BR>");
@@ -166,8 +184,17 @@ void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, c
 		QObject* obj = *it;
 		if( obj->objectName() == "lblText" ) {
 			QLabel *lbl = (QLabel *)obj;
-			lbl->setText( "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> " +
-						  _changeLinks(text) );
+
+			//Setting text to RT
+			_msgList[pos] = user + " " + text;
+
+			QString itemText = "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> ";
+			itemText.append( _changeLinks(text) );
+			itemText.append("<BR>");
+			itemText.append("<a href=\"@@" + id + "|" + user);
+			itemText.append("\">Reply</a> - <a href=\"##" + QString::number(pos) + "\">Retweet</a>");
+
+			lbl->setText( itemText );
 		} else if( obj->objectName() == "lblImg" ) {
 			QLabel *lblImg = (QLabel *)obj;
 			if( img != NULL ) {
@@ -181,6 +208,21 @@ void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, c
 	}
 }
 
+QString WndTimeline::_getItem(int pos)
+{
+	QFrame *fra = _frameList.at(pos);
+	const QObjectList &list = fra->children();
+
+	for( QObjectList::const_iterator it = list.constBegin(); it != list.constEnd(); it++ ) {
+		QObject* obj = *it;
+		if( obj->objectName() == "lblText" ) {
+			QLabel *lbl = (QLabel *)obj;
+			return lbl->text();
+		}
+	}
+	return "";
+}
+
 const QImage *WndTimeline::_getPicture(const QString &user, const QString &picUrl)
 {
 	return _twitter.getPicture(user, picUrl);
@@ -191,8 +233,18 @@ void WndTimeline::linkClicked(QString desc)
 	QString ret;
 
 	if( desc.startsWith("@@") ) {
-		//Reply
+		//Reply message
 		ret = _parseReply(desc);
+	} else if( desc.startsWith("@") ) {
+		//reply to user
+		ret = _parseReply(desc);
+	} else if( desc.startsWith("http://") ) {
+		//Url - Web Browser
+		QDesktopServices::openUrl(desc);
+	} else if( desc.startsWith("##") ) {
+		ret = _parseRT(desc);
+	} else if( desc.startsWith("#") ) {
+		_parseTag(desc);
 	} else {
 		QMessageBox::information(this, "link", desc);
 	}
@@ -211,28 +263,60 @@ QString WndTimeline::_parseReply(const QString &cmd)
 {
 	QStringList ret;
 
-	QStringList params = cmd.split("|");
-	if( params.size() != 2 ) {
-		QMessageBox::critical(this, "Erro", "Erro em reply");
+	if( cmd.startsWith("@@") ) {
+		QStringList params = cmd.split("|");
+		if( params.size() != 2 ) {
+			QMessageBox::critical(this, "Erro", "Erro em reply");
+			return "";
+		}
+
+		int id=0;
+		const QString &sId = params[0];
+		if( sId.size() > 2 ) {
+			QString s = sId.mid(2);
+			id = s.toInt();
+		}
+
+		if( params[1].size() > 0 ) {
+			ret << "@" << params[1] << " ";
+
+			if( id > 0 ) _inReplyTo = id;
+		}
+
+		return ret.join("");
+	} else if( cmd.startsWith("@") ) {
+		//Simple reply
+		_inReplyTo = 0;
+		return cmd + " ";
+	}
+	return "";
+
+}
+
+void WndTimeline::_parseTag(const QString &tag)
+{
+	QUrl url("http://search.twitter.com/search");
+
+	QPair<QString, QString> item;
+	item.first = "q";
+	item.second = tag;
+	QList<QPair<QString, QString> > list;
+	list.append(item);
+
+	url.setQueryItems(list);
+
+	QDesktopServices::openUrl(url);
+}
+
+QString WndTimeline::_parseRT(const QString &msgNum)
+{
+	int msg;
+	if( !msgNum.startsWith("##") ) {
 		return "";
 	}
+	msg = msgNum.mid(2).toInt();
 
-	int id=0;
-	const QString &sId = params[0];
-	if( sId.size() > 2 ) {
-		QString s = sId.mid(2);
-		id = s.toInt();
-	}
-
-
-	if( params[1].size() > 0 ) {
-		ret << "@" << params[1] << " ";
-
-		if( id > 0 ) _inReplyTo = id;
-
-	}
-
-	return ret.join("");
+	return "RT @" + _msgList[msg];
 
 }
 
@@ -262,6 +346,7 @@ QString WndTimeline::_changeLinks(const QString &text)
 			if( ini > 0 ) ret += text.mid(end, ini-end);
 			end = _endTok(text, ini);
 			QString link = text.mid(ini, end-ini);
+			link = _cleanLink(link);
 			ret += "<a href=\"" + link + "\">" + link + "</a>";
 		}
 	}
@@ -285,10 +370,38 @@ int WndTimeline::_endTok(const QString &text, int pos)
 	return i;
 }
 
+QString WndTimeline::_cleanLink(const QString &tok)
+{
+	if( tok.startsWith("@") || tok.startsWith("#") ) {
+		int i=0;
+		//Let's skip @, #
+		for(;i < tok.size(); i++) {
+			QChar c = tok.at(i);
+			if( c.isLetterOrNumber() || c == '_' || c == '.' ) break;
+		}
+
+		//Let's get the last alphanumeric
+		for(;i < tok.size(); i++) {
+			QChar c = tok.at(i);
+			if( !(c.isLetterOrNumber() || c == '_' || c == '.') ) {
+				break;
+			}
+		}
+		if( i > 0 ) {
+			QString ret = tok.left(i);
+			if( ret.endsWith(".") ) {
+				ret = ret.left(ret.size() - 1);
+			}
+			return ret;
+		}
+	}
+	return tok;
+}
+
 bool WndTimeline::_checkCredentials()
 {
 	if( !_credentials.hasUserSet() ) {
-		QMessageBox::critical(this, tr("Erro logando"), tr("O usu√°rio e senha do twitter<BR>n√É¬£o est√É¬£o configurados"));
+		QMessageBox::critical(this, tr("Erro logando"), tr("O usu·rio e senha do twitter<BR>n„o est„o configurados"));
 		return false;
 	}
 	return true;
@@ -354,6 +467,12 @@ void WndTimeline::onUpdatePressed()
 		_twitter.postUpdate( text, _inReplyTo );
 		_inReplyTo = 0;
 	}
+}
+
+void WndTimeline::onCancelPressed()
+{
+	ui->txtUpdate->clear();
+	ui->fraUpdate->setVisible(false);
 }
 
 void WndTimeline::onUpdate(Timeline *timeLine, int error)

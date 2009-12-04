@@ -18,13 +18,15 @@ protected:
 
 		if( event->key() == Qt::Key_Return && event->modifiers() == Qt::ShiftModifier )
 		{
-			qDebug() << "ASDASD";
 			emit submit();
+		} else if( event->key() == Qt::Key_Escape ) {
+			emit cancel();
 		}
+
 		QPlainTextEdit::keyPressEvent(event);
 	}
 
 signals:
 	void submit();
-
+	void cancel();
 };
