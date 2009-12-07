@@ -78,7 +78,7 @@ bool Twitter::_getTimeline(const QString &url, int count)
 
 bool Twitter::postUpdate(const QString &data, quint64 inReplyTo)
 {
-	//TODO: Fazer o m·x de requests por minuto
+	//TODO: Fazer o m√°x de requests por minuto
 	QString twitterUrl;
 
 	twitterUrl = _updateUrl;

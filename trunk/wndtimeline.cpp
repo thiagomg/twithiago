@@ -401,7 +401,7 @@ QString WndTimeline::_cleanLink(const QString &tok)
 bool WndTimeline::_checkCredentials()
 {
 	if( !_credentials.hasUserSet() ) {
-		QMessageBox::critical(this, tr("Erro logando"), tr("O usu·rio e senha do twitter<BR>n„o est„o configurados"));
+		QMessageBox::critical(this, tr("Erro logando"), tr("O usu√°rio e senha do twitter<BR>n√£o est√£o configurados"));
 		return false;
 	}
 	return true;
