@@ -95,11 +95,28 @@ border-color: #696 #363 #363 #696;</string>
         <number>0</number>
        </property>
        <item>
-        <widget class="QLabel" name="lblUpdateTitle">
-         <property name="text">
-          <string>Digite o novo post</string>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="lblUpdateTitle">
+           <property name="text">
+            <string>Digite o novo post</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lblCount">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::PlainText</enum>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <widget class="TextUpdate" name="txtUpdate">
@@ -148,8 +165,8 @@ border-color: #696 #363 #363 #696;</string>
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>256</width>
-         <height>261</height>
+         <width>262</width>
+         <height>256</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -181,7 +198,7 @@ border-color: #696 #363 #363 #696;</string>
      <x>0</x>
      <y>0</y>
      <width>276</width>
-     <height>21</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Arquivo">

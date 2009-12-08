@@ -70,7 +70,8 @@ private:
 	int _inReplyTo;
 
 private slots:
-	void on_actionUpdate_triggered();
+         void on_txtUpdate_textChanged();
+         void on_actionUpdate_triggered();
 	void on_actionSair_triggered();
 	void on_actionConfigurar_triggered();
 	void onTimeline();
