@@ -456,17 +456,22 @@ void WndTimeline::on_actionUpdate_triggered()
 void WndTimeline::_showUpdate()
 {
 	ui->fraUpdate->setVisible(true);
+        ui->lblCount->setText("0");
 	ui->txtUpdate->setFocus();
 }
 
 void WndTimeline::onUpdatePressed()
 {
+    if( ui->txtUpdate->toPlainText().size() <= 140 ) {
 	QString text = ui->txtUpdate->toPlainText();
 	if( text.size() > 0 ) {
 		ui->txtUpdate->setEnabled(false);
 		_twitter.postUpdate( text, _inReplyTo );
 		_inReplyTo = 0;
 	}
+    } else {
+        QMessageBox::critical(this, "Erro!", "O tamanho total da mensagem é de 140 caracteres");
+    }
 }
 
 void WndTimeline::onCancelPressed()
@@ -495,3 +500,15 @@ void WndTimeline::onUpdate(Timeline *timeLine, int error)
 	}
 
 }
+
+void WndTimeline::on_txtUpdate_textChanged()
+{
+    int tam = ui->txtUpdate->toPlainText().size();
+    if( tam > 140 ) {
+        ui->lblCount->setStyleSheet("color:red;");
+    } else {
+        ui->lblCount->setStyleSheet("");
+    }
+    ui->lblCount->setText( QString::number(tam) );
+}
+
