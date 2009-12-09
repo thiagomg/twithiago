@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Twithiago</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="imgs.qrc">
+    <normaloff>:/imgs/catapult</normaloff>:/imgs/catapult</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true"/>
   </property>
@@ -165,8 +169,8 @@ border-color: #696 #363 #363 #696;</string>
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>262</width>
-         <height>256</height>
+         <width>256</width>
+         <height>259</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -198,7 +202,7 @@ border-color: #696 #363 #363 #696;</string>
      <x>0</x>
      <y>0</y>
      <width>276</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Arquivo">
@@ -248,6 +252,8 @@ border-color: #696 #363 #363 #696;</string>
    <header>TextUpdate.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="imgs.qrc"/>
+ </resources>
  <connections/>
 </ui>
