@@ -3,6 +3,7 @@
 
 #include <QtGui/QMainWindow>
 #include <QFrame>
+#include <QTimer>
 
 #include "twitter.h"
 #include "Credentials.h"
@@ -69,9 +70,11 @@ private:
 	int _telaAtual;
 	int _inReplyTo;
 
+	QTimer timerRefresh;
+
 private slots:
-         void on_txtUpdate_textChanged();
-         void on_actionUpdate_triggered();
+	void on_txtUpdate_textChanged();
+	void on_actionUpdate_triggered();
 	void on_actionSair_triggered();
 	void on_actionConfigurar_triggered();
 	void onTimeline();
@@ -84,6 +87,8 @@ private slots:
 	void onUpdate(Timeline *timeLine, int error);
 
 	void linkClicked(QString desc);
+
+	void onRefreshTimeline();
 
 };
 
