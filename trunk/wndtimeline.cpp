@@ -124,6 +124,7 @@ void WndTimeline::_createItem(int pos, const QString &id, const QString &user, c
 	fra->setLayout( mainLay );
 	fra->layout()->setMargin(1);
 	fra->layout()->setSizeConstraint(QLayout::SetMinimumSize);
+	fra->layout()->setAlignment(Qt::AlignLeft);
 	fra->setStyleSheet("background-color: rgb(234, 255, 234);");
 	ui->layTimeline->addWidget( fra );
 
