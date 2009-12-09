@@ -27,3 +27,4 @@ HEADERS += wndtimeline.h \
     TextUpdate.h
 FORMS += wndtimeline.ui \
     frmconfig.ui
+RESOURCES += imgs.qrc

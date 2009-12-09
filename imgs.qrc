@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/imgs">
+        <file alias="catapult">C:/Users/tmguedes/Pictures/catapult.png</file>
+        <file alias="catapult_g">C:/Users/tmguedes/Pictures/catapult_g.png</file>
+    </qresource>
+</RCC>

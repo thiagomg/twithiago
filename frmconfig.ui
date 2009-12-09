@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="imgs.qrc">
+    <normaloff>:/imgs/catapult</normaloff>:/imgs/catapult</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,1,0,0,1,0">
    <item>
     <widget class="QLabel" name="lblTitle">
@@ -131,6 +135,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="imgs.qrc"/>
+ </resources>
  <connections/>
 </ui>
