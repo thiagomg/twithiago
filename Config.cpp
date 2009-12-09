@@ -8,7 +8,7 @@
 static Config *_this = 0;
 
 Config::Config() :
-	_settings(QString("Blogaro"), QString("Twithiago"), 0)
+	_settings(QString("Blogaro"), QString("Katapulto"), 0)
 {
 	_configLoaded = false;
 }

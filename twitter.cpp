@@ -101,7 +101,7 @@ bool Twitter::postUpdate(const QString &data, quint64 inReplyTo)
 	if ( inReplyTo != 0 ) {
 		postData.append( "&in_reply_to_status_id=" + QByteArray::number( inReplyTo ) );
 	}
-	postData.append( "&source=Twithiago" );
+	postData.append( "&source=Katapulto" );
 
 	request.setAttribute( ATTR_TIPO, 102 );
 

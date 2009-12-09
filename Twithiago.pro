@@ -5,7 +5,7 @@ QT += network \
     xml
 CONFIG += oauth \
     crypto
-TARGET = Twithiago
+TARGET = Katapulto
 TEMPLATE = app
 SOURCES += main.cpp \
     wndtimeline.cpp \
