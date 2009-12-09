@@ -401,7 +401,7 @@ QString WndTimeline::_cleanLink(const QString &tok)
 bool WndTimeline::_checkCredentials()
 {
 	if( !_credentials.hasUserSet() ) {
-		QMessageBox::critical(this, tr("Erro logando"), tr("O usuário e senha do twitter<BR>não estão configurados"));
+                QMessageBox::critical(this, tr("Erro logando"), tr("O usu&aacute;rio e senha do twitter<BR>n&atilde;o est&atilde;o configurados."));
 		return false;
 	}
 	return true;
@@ -434,6 +434,7 @@ void WndTimeline::onFriendPicture(const QTwitPicture &pic)
 void WndTimeline::on_actionConfigurar_triggered()
 {
 	FrmConfig cfg(this);
+        cfg.setWindowFlags(cfg.windowFlags() | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
 	cfg.setModal(true);
 	cfg.exec();
 	_credentials.loadConfig();
