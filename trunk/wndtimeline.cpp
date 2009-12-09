@@ -14,8 +14,11 @@
 //TODO: pass to config
 #define MSG_COUNT 50
 
+//#define _DISABLE_TIMER
+
 WndTimeline::WndTimeline(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::WndTimeline)
+	: QMainWindow(parent), ui(new Ui::WndTimeline),
+	timerRefresh(this)
 {
     ui->setupUi(this);
 
@@ -37,6 +40,11 @@ WndTimeline::WndTimeline(QWidget *parent)
 	ui->fraUpdate->setVisible(false);
 	_inReplyTo = 0;
 	_telaAtual = _TELA_NADA;
+
+#ifndef _DISABLE_TIMER
+	connect(&timerRefresh, SIGNAL(timeout()), this, SLOT(onRefreshTimeline()));
+	timerRefresh.start(15000);
+#endif
 
 }
 
@@ -88,10 +96,10 @@ void WndTimeline::_setWaiting(bool waiting)
 {
 	if( waiting ) {
 		ui->statusBar->showMessage("Pegando mensagens");
-                ui->scrTimeline->setEnabled(false);
+		//ui->scrTimeline->setEnabled(false);
 	} else {
 		ui->statusBar->clearMessage();
-		ui->scrTimeline->setEnabled(true);
+		//ui->scrTimeline->setEnabled(true);
 	}
 }
 
@@ -439,6 +447,7 @@ void WndTimeline::on_actionConfigurar_triggered()
 	cfg.setModal(true);
 	cfg.exec();
 	_credentials.loadConfig();
+	_twitter.setTwitterAccount( _credentials.getUsername(), _credentials.getPassword() );
 }
 
 void WndTimeline::on_actionSair_triggered()
@@ -489,17 +498,7 @@ void WndTimeline::onUpdate(Timeline *timeLine, int error)
 	ui->txtUpdate->setEnabled(true);
 	ui->fraUpdate->setVisible(false);
 
-	switch( _telaAtual ) {
-	case _TELA_TIMELINE:
-		onTimeline();
-		break;
-	case _TELA_MENTIONS:
-		onMentions();
-		break;
-	case _TELA_DIRECT:
-		onDirect();
-		break;
-	}
+	onRefreshTimeline();
 }
 
 void WndTimeline::on_txtUpdate_textChanged()
@@ -513,3 +512,17 @@ void WndTimeline::on_txtUpdate_textChanged()
 	ui->lblCount->setText( QString::number(tam) );
 }
 
+void WndTimeline::onRefreshTimeline()
+{
+	switch( _telaAtual ) {
+	case _TELA_TIMELINE:
+		onTimeline();
+		break;
+	case _TELA_MENTIONS:
+		onMentions();
+		break;
+	case _TELA_DIRECT:
+		onDirect();
+		break;
+	}
+}
