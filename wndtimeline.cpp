@@ -401,7 +401,7 @@ QString WndTimeline::_cleanLink(const QString &tok)
 bool WndTimeline::_checkCredentials()
 {
 	if( !_credentials.hasUserSet() ) {
-                QMessageBox::critical(this, tr("Erro logando"), tr("O usu&aacute;rio e senha do twitter<BR>n&atilde;o est&atilde;o configurados."));
+		QMessageBox::critical(this, tr("Erro logando"), tr("O usu&aacute;rio e senha do twitter<BR>n&atilde;o est&atilde;o configurados."));
 		return false;
 	}
 	return true;
@@ -457,22 +457,22 @@ void WndTimeline::on_actionUpdate_triggered()
 void WndTimeline::_showUpdate()
 {
 	ui->fraUpdate->setVisible(true);
-        ui->lblCount->setText("0");
+	ui->lblCount->setText("0");
 	ui->txtUpdate->setFocus();
 }
 
 void WndTimeline::onUpdatePressed()
 {
-    if( ui->txtUpdate->toPlainText().size() <= 140 ) {
-	QString text = ui->txtUpdate->toPlainText();
-	if( text.size() > 0 ) {
-		ui->txtUpdate->setEnabled(false);
-		_twitter.postUpdate( text, _inReplyTo );
-		_inReplyTo = 0;
+	if( ui->txtUpdate->toPlainText().size() <= 140 ) {
+		QString text = ui->txtUpdate->toPlainText();
+		if( text.size() > 0 ) {
+			ui->txtUpdate->setEnabled(false);
+			_twitter.postUpdate( text, _inReplyTo );
+			_inReplyTo = 0;
+		}
+	} else {
+		QMessageBox::critical(this, "Erro!", "O tamanho total da mensagem é de 140 caracteres");
 	}
-    } else {
-        QMessageBox::critical(this, "Erro!", "O tamanho total da mensagem é de 140 caracteres");
-    }
 }
 
 void WndTimeline::onCancelPressed()
@@ -489,27 +489,26 @@ void WndTimeline::onUpdate(Timeline *timeLine, int error)
 	ui->fraUpdate->setVisible(false);
 
 	switch( _telaAtual ) {
- case _TELA_TIMELINE:
+	case _TELA_TIMELINE:
 		onTimeline();
 		break;
- case _TELA_MENTIONS:
+	case _TELA_MENTIONS:
 		onMentions();
 		break;
- case _TELA_DIRECT:
+	case _TELA_DIRECT:
 		onDirect();
 		break;
 	}
-
 }
 
 void WndTimeline::on_txtUpdate_textChanged()
 {
-    int tam = ui->txtUpdate->toPlainText().size();
-    if( tam > 140 ) {
-        ui->lblCount->setStyleSheet("color:red;");
-    } else {
-        ui->lblCount->setStyleSheet("");
-    }
-    ui->lblCount->setText( QString::number(tam) );
+	int tam = ui->txtUpdate->toPlainText().size();
+	if( tam > 140 ) {
+		ui->lblCount->setStyleSheet("color:red;");
+	} else {
+		ui->lblCount->setStyleSheet("");
+	}
+	ui->lblCount->setText( QString::number(tam) );
 }
 
