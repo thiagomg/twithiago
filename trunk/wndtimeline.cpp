@@ -41,6 +41,17 @@ WndTimeline::WndTimeline(QWidget *parent)
 	_inReplyTo = 0;
 	_telaAtual = _TELA_NADA;
 
+	//SYSTRAY ---------------------------------
+	_createSystray();
+	connect(systray, SIGNAL(messageClicked()), this, SLOT(messageClicked()));
+	connect(systray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+				 this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+
+	systray->show();
+	systray->showMessage("ASDASD", "DASDAS");
+	//=========================================
+
+
 #ifndef _DISABLE_TIMER
 	connect(&timerRefresh, SIGNAL(timeout()), this, SLOT(onRefreshTimeline()));
 	timerRefresh.start(15000);
@@ -52,6 +63,45 @@ WndTimeline::~WndTimeline()
 {
 	delete ui;
 }
+
+void WndTimeline::_createSystray()
+{
+	systray = new QSystemTrayIcon(this);
+
+	actShowHide = new QAction(tr("Show/Hide"), this);
+	connect(actShowHide, SIGNAL(triggered()), this, SLOT(onActionShowHideTriggered()));
+	actExit = new QAction(tr("Sair"), this);
+	connect(actExit, SIGNAL(triggered()), this, SLOT(onActionSairTriggered()));
+
+	trayMenu = new QMenu();
+	trayMenu->addAction(actShowHide);
+	trayMenu->addSeparator();
+	trayMenu->addAction(actExit);
+
+	systray->setContextMenu(trayMenu);
+}
+
+void WndTimeline::messageClicked()
+{
+	QMessageBox::information(0, tr("Systray"),
+							 tr("Sorry, I already gave what help I could.\n"
+								"Maybe you should try asking a human?"));
+}
+
+void WndTimeline::iconActivated(QSystemTrayIcon::ActivationReason reason)
+ {
+	 switch (reason) {
+	 case QSystemTrayIcon::Trigger:
+	 case QSystemTrayIcon::DoubleClick:
+		 onActionShowHideTriggered();
+		 break;
+	 case QSystemTrayIcon::MiddleClick:
+		 //showMessage();
+		 break;
+	 default:
+		 ;
+	 }
+ }
 
 void WndTimeline::_checkMsgList()
 {
@@ -450,9 +500,18 @@ void WndTimeline::on_actionConfigurar_triggered()
 	_twitter.setTwitterAccount( _credentials.getUsername(), _credentials.getPassword() );
 }
 
-void WndTimeline::on_actionSair_triggered()
+void WndTimeline::onActionSairTriggered()
 {
 	this->close();
+}
+
+void WndTimeline::onActionShowHideTriggered()
+{
+	if( this->isHidden() ) {
+		this->show();
+	} else {
+		this->hide();
+	}
 }
 
 void WndTimeline::on_actionUpdate_triggered()

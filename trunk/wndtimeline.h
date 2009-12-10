@@ -4,6 +4,7 @@
 #include <QtGui/QMainWindow>
 #include <QFrame>
 #include <QTimer>
+#include <QSystemTrayIcon>
 
 #include "twitter.h"
 #include "Credentials.h"
@@ -44,6 +45,12 @@ protected:
 	QString _parseRT(const QString &msgNum);
 	//====================================================
 
+	//System Tray ----------------------
+	void _createSystray();
+	void messageClicked();
+	void iconActivated(QSystemTrayIcon::ActivationReason reason);
+	//==================================
+
 private:
 	enum TIPO_REQ {
 		_TIPO_NADA,
@@ -72,11 +79,19 @@ private:
 
 	QTimer timerRefresh;
 
+	//System Tray ----------------------
+	QSystemTrayIcon *systray;
+	QMenu   *trayMenu;
+	QAction *actShowHide;
+	QAction *actExit;
+	//==================================
+
 private slots:
 	void on_txtUpdate_textChanged();
 	void on_actionUpdate_triggered();
-	void on_actionSair_triggered();
+	void onActionSairTriggered();
 	void on_actionConfigurar_triggered();
+	void onActionShowHideTriggered();
 	void onTimeline();
 	void onMentions();
 	void onDirect();
