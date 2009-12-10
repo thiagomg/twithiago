@@ -43,12 +43,13 @@ WndTimeline::WndTimeline(QWidget *parent)
 
 	//SYSTRAY ---------------------------------
 	_createSystray();
+
 	connect(systray, SIGNAL(messageClicked()), this, SLOT(messageClicked()));
 	connect(systray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 				 this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+	systray->setIcon( this->windowIcon() );
 
 	systray->show();
-	systray->showMessage("ASDASD", "DASDAS");
 	//=========================================
 
 
@@ -92,6 +93,7 @@ void WndTimeline::iconActivated(QSystemTrayIcon::ActivationReason reason)
  {
 	 switch (reason) {
 	 case QSystemTrayIcon::Trigger:
+		 break;
 	 case QSystemTrayIcon::DoubleClick:
 		 onActionShowHideTriggered();
 		 break;

@@ -47,8 +47,6 @@ protected:
 
 	//System Tray ----------------------
 	void _createSystray();
-	void messageClicked();
-	void iconActivated(QSystemTrayIcon::ActivationReason reason);
 	//==================================
 
 private:
@@ -104,6 +102,11 @@ private slots:
 	void linkClicked(QString desc);
 
 	void onRefreshTimeline();
+
+	//SYSTRAY
+	void messageClicked();
+	void iconActivated(QSystemTrayIcon::ActivationReason reason);
+
 
 };
 
