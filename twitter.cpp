@@ -4,6 +4,9 @@
 #include <QBuffer>
 #include <QMessageBox>
 
+//#include <QFile>
+//#include <QTextStream>
+
 #include "friendlisthandler.h"
 
 
@@ -139,11 +142,12 @@ const QTwitPicture *Twitter::getPicture(const QString &userName, const QString &
 void Twitter::onNetRecv(QNetworkReply *reply)
 {
 	QString url = reply->url().toString(QUrl::None);
-	qDebug() << url;
+	QString upUrl = url.toUpper();
+	qDebug() << "Twitter::onNetRecv" << url;
 
 	if( url.contains(_timelineUrl) || url.contains(_mentionsUrl) || url.contains(_directsUrl) ) {
 		_processTimeline(reply);
-	} else if( url.endsWith(".jpg") || url.endsWith(".png")  || url.endsWith(".gif") ) {
+	} else if( url.endsWith(".jpg", Qt::CaseInsensitive) || url.endsWith(".png", Qt::CaseInsensitive)  || url.endsWith(".gif", Qt::CaseInsensitive) ) {
 		_processPictures(reply);
 	} else if( url.contains(_updateUrl) ) {
 		_processUpdate(reply);
@@ -161,7 +165,17 @@ void Twitter::_processTimeline(QNetworkReply *reply)
 	{
 		QByteArray bytes = reply->readAll();
 		QString s(bytes);
-		//ui->edtResult->setPlainText(s);
+
+		/*
+		{
+			QFile f("timeline.xml");
+			if( f.open(QIODevice::WriteOnly) ) {
+				QTextStream ts(&f);
+				ts << s;
+				f.close();
+			}
+		}*/
+
 		emit onFriendsTimelineXML(s, 0);
 
 		QXmlSimpleReader reader;
