@@ -2,9 +2,11 @@
 #define WNDTIMELINE_H
 
 #include <QtGui/QMainWindow>
-#include <QFrame>
+#include <QLabel>
 #include <QTimer>
 #include <QSystemTrayIcon>
+#include <QRubberBand>
+#include <QPair>
 
 #include "twitter.h"
 #include "Credentials.h"
@@ -49,6 +51,12 @@ protected:
 	void _createSystray();
 	//==================================
 
+	QRubberBand *rubberBand;
+	QPoint _origin;
+	virtual void mouseMoveEvent ( QMouseEvent * event );
+	virtual void mousePressEvent ( QMouseEvent * event );
+	virtual void mouseReleaseEvent ( QMouseEvent * event );
+
 private:
 	enum TIPO_REQ {
 		_TIPO_NADA,
@@ -66,7 +74,10 @@ private:
 
     Ui::WndTimeline *ui;
 	Twitter _twitter;
-	QList< QFrame* > _frameList;
+
+	typedef QPair<QLabel *, QLabel *> FrameItem;
+	typedef QList< FrameItem > FrameList;
+	FrameList _frameList;
 	QVector< QString > _msgList;
 	TIPO_REQ _tipoReq;
 

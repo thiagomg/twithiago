@@ -4,17 +4,12 @@
 #include "frmconfig.h"
 #include "Config.h"
 
-#include <QMessageBox>
-#include <QLabel>
-#include <QCommandLinkButton>
-#include <QFormLayout>
-
-#include <QDesktopServices>
+#include <QtGui>
 
 //TODO: pass to config
-#define MSG_COUNT 50
+#define MSG_COUNT 10
 
-//#define _DISABLE_TIMER
+#define _DISABLE_TIMER
 
 WndTimeline::WndTimeline(QWidget *parent)
 	: QMainWindow(parent), ui(new Ui::WndTimeline),
@@ -58,12 +53,44 @@ WndTimeline::WndTimeline(QWidget *parent)
 	timerRefresh.start(15000);
 #endif
 
+	rubberBand = NULL;
+
 }
 
 WndTimeline::~WndTimeline()
 {
 	delete ui;
 }
+
+void WndTimeline::mousePressEvent(QMouseEvent *event)
+ {
+	/*
+	 _origin = event->pos();
+	 if (!rubberBand)
+		 rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+	 rubberBand->setGeometry(QRect(_origin, QSize()));
+	 rubberBand->show();
+	 qDebug() << "ini rubber";
+*/
+ }
+
+ void WndTimeline::mouseMoveEvent(QMouseEvent *event)
+ {
+	 /*
+	 if( rubberBand != NULL )
+		 rubberBand->setGeometry(QRect(_origin, event->pos()).normalized());
+	 */
+ }
+
+ void WndTimeline::mouseReleaseEvent(QMouseEvent *event)
+ {
+	 /*
+	 if( rubberBand != NULL )
+		 rubberBand->hide();
+	 // determine selection, for example using QRect::intersects()
+	 // and QRect::contains().
+	 */
+ }
 
 void WndTimeline::_createSystray()
 {
@@ -169,7 +196,6 @@ void WndTimeline::onFriendsTimeline(Timeline *timeline, int error)
 			_createItem(i, id, user, picUrl, text);
 		} else {
 			_updateItem(i, id, user, picUrl, text);
-
 		}
 
 	}
@@ -178,21 +204,22 @@ void WndTimeline::onFriendsTimeline(Timeline *timeline, int error)
 
 void WndTimeline::_createItem(int pos, const QString &id, const QString &user, const QString &picUrl, const QString &text)
 {
-	QFrame *fra = new QFrame(ui->scrTimeline);
-	_frameList.push_back(fra);
-	QVBoxLayout *mainLay = new QVBoxLayout();
-	fra->setLayout( mainLay );
-	fra->layout()->setMargin(1);
-	fra->layout()->setSizeConstraint(QLayout::SetMinimumSize);
-	fra->layout()->setAlignment(Qt::AlignLeft);
-	fra->setStyleSheet("background-color: rgb(234, 255, 234);");
-	ui->layTimeline->addWidget( fra );
 
-	QFormLayout *layText = new QFormLayout( NULL );
+	if( ui->scrTimelineContents->layout() == NULL ) {
+		QVBoxLayout *lay = new QVBoxLayout();
+		lay->setMargin(0);
+		lay->setSpacing(2);
+		ui->scrTimelineContents->setLayout( lay );
 
-	//Text ---------------------------------------------------------
-	QLabel *lbl = new QLabel(ui->scrTimeline);
-	lbl->setObjectName("lblText");
+	}
+
+	QVBoxLayout *layScr = (QVBoxLayout *)ui->scrTimelineContents->layout();
+
+	QHBoxLayout *layLine = new QHBoxLayout();
+
+	QLabel *lblText = new QLabel(ui->scrTimelineContents);
+	lblText->setObjectName(QString::fromUtf8("lblText"));
+	lblText->setWordWrap(true);
 
 	//Setting text to RT
 	_msgList[pos] = user + " " + text;
@@ -202,75 +229,61 @@ void WndTimeline::_createItem(int pos, const QString &id, const QString &user, c
 	itemText.append("<BR>");
 	itemText.append("<a href=\"@@" + id + "|" + user);
 	itemText.append("\">Reply</a> - <a href=\"##" + QString::number(pos) + "\">Retweet</a>");
-	lbl->setText( itemText );
+	lblText->setText(itemText);
+	lblText->setMaximumWidth( ui->scrTimeline->width() - 52 );
+	connect(lblText, SIGNAL(linkActivated(QString)), this, SLOT(linkClicked(QString)));
 
-	QLabel *lblImg = new QLabel(ui->scrTimeline);
-	lblImg->setObjectName("lblImg");
+	QLabel *lblImg = new QLabel(ui->scrTimelineContents);
+	lblImg->setObjectName(QString::fromUtf8("lblImg"));
+	lblImg->setMinimumSize(QSize(48, 48));
+	lblImg->setMaximumSize(QSize(48, 48));
 	lblImg->setToolTip(user);
-	lblImg->setBackgroundRole(QPalette::Base);
-	lblImg->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-	lblImg->setFixedSize(48, 48);
-
 	const QImage *img = _getPicture(user, picUrl);
 	if( img != NULL ) {
 		lblImg->setPixmap( QPixmap::fromImage(*img) );
 	}
 
-	connect(lbl, SIGNAL(linkActivated(QString)), this, SLOT(linkClicked(QString)));
-	lbl->setWordWrap(true);
+	layLine->addWidget(lblImg); //, 0, Qt::AlignLeft);
+	layLine->addWidget(lblText, 1);
 
-	layText->addRow(lblImg, lbl);
-
-	mainLay->addLayout(layText);
+	layScr->addLayout( layLine );
 
 	//Line ---------------------------------------------------------
-	QFrame *line = new QFrame(fra);
+	QFrame *line = new QFrame(ui->scrTimelineContents);
 	line->setObjectName(QString::fromUtf8("line"));
 	line->setFrameShape(QFrame::HLine);
 	line->setFrameShadow(QFrame::Plain);
-	fra->layout()->addWidget(line);
+
+	layScr->addWidget( line );
+
+	_frameList.append( FrameItem(lblImg, lblText) );
 }
 
 void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, const QString &picUrl, const QString &text)
 {
-	QFrame *fra = _frameList.at(pos);
-	const QObjectList &list = fra->children();
-
-	const QImage *img = NULL;
-	if( picUrl.size() > 0 ) {
-		img = _getPicture(user, picUrl);
+	if( pos >= _frameList.size() ) {
+		QMessageBox::critical(this, "ERRO!!!", "Update chamado para frame > _frameList.size()");
+		return;
 	}
 
-	for( QObjectList::const_iterator it = list.constBegin(); it != list.constEnd(); it++ ) {
-		QObject* obj = *it;
-		if( obj->objectName() == "lblText" ) {
-			QLabel *lbl = (QLabel *)obj;
+	const FrameItem &item = _frameList.at(pos);
+	QLabel *lblImg = item.first;
+	QLabel *lblText = item.second;
 
-			//Setting text to RT
-			_msgList[pos] = user + " " + text;
-
-			QString itemText = "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> ";
-			itemText.append( _changeLinks(text) );
-			itemText.append("<BR>");
-			itemText.append("<a href=\"@@" + id + "|" + user);
-			itemText.append("\">Reply</a> - <a href=\"##" + QString::number(pos) + "\">Retweet</a>");
-
-			lbl->setText( itemText );
-		} else if( obj->objectName() == "lblImg" ) {
-			QLabel *lblImg = (QLabel *)obj;
-			if( img != NULL ) {
-				lblImg->setFixedSize(48, 48);
-				lblImg->setPixmap( QPixmap::fromImage(*img) );
-			} else {
-				lblImg->setText("");
-				lblImg->clear();
-			}
-		}
+	const QImage *img =_getPicture(user, picUrl);
+	if( img != NULL ) {
+		lblImg->setPixmap( QPixmap::fromImage(*img) );
+		lblImg->setToolTip(user);
 	}
+
+	lblText->setText(text);
+
+
 }
 
 QString WndTimeline::_getItem(int pos)
 {
+	/*
 	QFrame *fra = _frameList.at(pos);
 	const QObjectList &list = fra->children();
 
@@ -281,6 +294,7 @@ QString WndTimeline::_getItem(int pos)
 			return lbl->text();
 		}
 	}
+	*/
 	return "";
 }
 
@@ -471,22 +485,16 @@ bool WndTimeline::_checkCredentials()
 void WndTimeline::onFriendPicture(const QTwitPicture &pic)
 {
 	qDebug() << "CHEGOU IMG " << pic.getUsername();
-	QList< QFrame* >::iterator itf = _frameList.begin();
+	QList< QPair<QLabel *, QLabel *> >::iterator itf = _frameList.begin();
 
 	for(; itf != _frameList.end(); itf++) {
-		QFrame *fra = *itf;
+		QLabel *lblImg = itf->first;
+		QLabel *lblText = itf->second;
 
-		const QObjectList &list = fra->children();
-		for( QObjectList::const_iterator it = list.constBegin(); it != list.constEnd(); it++ ) {
-			QObject* obj = *it;
-			if( obj->objectName() == "lblImg" ) {
-				QLabel *lblImg = (QLabel *)obj;
-				QString user = (QString)lblImg->toolTip();
-				if( user == pic.getUsername() ) {
-					lblImg->setPixmap( QPixmap::fromImage(pic) );
-					lblImg->setFixedSize(48, 48);
-					//lblImg->setScaledContents(true);
-				}
+		if( lblImg->objectName() == "lblImg" ) {
+			QString user = (QString)lblImg->toolTip();
+			if( user == pic.getUsername() ) {
+				lblImg->setPixmap( QPixmap::fromImage(pic) );
 			}
 		}
 	}//framelist
