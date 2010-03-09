@@ -8,7 +8,7 @@
 #include <QtGui>
 
 //TODO: pass to config
-#define MSG_COUNT 10
+#define MSG_COUNT 50
 
 //#define _DISABLE_TIMER
 
