@@ -3,13 +3,14 @@
 
 #include "frmconfig.h"
 #include "Config.h"
+#include "FrmNotification.h"
 
 #include <QtGui>
 
 //TODO: pass to config
 #define MSG_COUNT 10
 
-#define _DISABLE_TIMER
+//#define _DISABLE_TIMER
 
 WndTimeline::WndTimeline(QWidget *parent)
 	: QMainWindow(parent), ui(new Ui::WndTimeline),
@@ -278,7 +279,6 @@ void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, c
 
 	lblText->setText(text);
 
-
 }
 
 QString WndTimeline::_getItem(int pos)
@@ -484,7 +484,7 @@ bool WndTimeline::_checkCredentials()
 
 void WndTimeline::onFriendPicture(const QTwitPicture &pic)
 {
-	qDebug() << "CHEGOU IMG " << pic.getUsername();
+	//qDebug() << "CHEGOU IMG " << pic.getUsername();
 	QList< QPair<QLabel *, QLabel *> >::iterator itf = _frameList.begin();
 
 	for(; itf != _frameList.end(); itf++) {
