@@ -277,7 +277,13 @@ void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, c
 		lblImg->setToolTip(user);
 	}
 
-	lblText->setText(text);
+	QString itemText = "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> ";
+	itemText.append( _changeLinks(text) );
+	itemText.append("<BR>");
+	itemText.append("<a href=\"@@" + id + "|" + user);
+	itemText.append("\">Reply</a> - <a href=\"##" + QString::number(pos) + "\">Retweet</a>");
+
+	lblText->setText(itemText);
 
 }
 
