@@ -16,7 +16,8 @@ SOURCES += main.cpp \
     Config.cpp \
     frmconfig.cpp \
     QTwitPicture.cpp \
-    FormTeste.cpp
+    FormTeste.cpp \
+    FrmNotification.cpp
 HEADERS += wndtimeline.h \
     twitter.h \
     friendlisthandler.h \
@@ -26,8 +27,10 @@ HEADERS += wndtimeline.h \
     frmconfig.h \
     QTwitPicture.h \
     TextUpdate.h \
-    FormTeste.h
+    FormTeste.h \
+    FrmNotification.h
 FORMS += wndtimeline.ui \
     frmconfig.ui \
-    FormTeste.ui
+    FormTeste.ui \
+    FrmNotification.ui
 RESOURCES += imgs.qrc
