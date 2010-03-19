@@ -109,6 +109,7 @@ private slots:
 	void onUpdatePressed();
 	void onCancelPressed();
 	void onUpdate(Timeline *timeLine, int error);
+	void onError(QNetworkReply::NetworkError error, const QString &errorString);
 
 	void linkClicked(QString desc);
 

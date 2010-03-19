@@ -48,6 +48,7 @@ signals:
 	void onFriendsTimeline(Timeline *timeLine, int error);
 	void onFriendPicture(const QTwitPicture &img);
 	void onUpdate(Timeline *timeLine, int error);
+	void onError(QNetworkReply::NetworkError error, const QString &errorString);
 
 private slots:
 	void onNetRecv(QNetworkReply *reply);
