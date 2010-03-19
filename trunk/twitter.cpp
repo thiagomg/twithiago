@@ -192,6 +192,7 @@ void Twitter::_processTimeline(QNetworkReply *reply)
 	{
 		emit onFriendsTimelineXML(reply->errorString(), 1);
 		emit onFriendsTimeline(NULL, 1);
+		emit onError(reply->error(), reply->errorString());
 	}
 }
 

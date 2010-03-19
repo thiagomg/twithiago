@@ -24,6 +24,7 @@ WndTimeline::WndTimeline(QWidget *parent)
 	connect(&_twitter, SIGNAL(onFriendsTimeline(Timeline *, int)), this, SLOT(onFriendsTimeline(Timeline *, int)));
 	connect(&_twitter, SIGNAL(onFriendPicture(QTwitPicture)), this, SLOT(onFriendPicture(QTwitPicture)));
 	connect(&_twitter, SIGNAL(onUpdate(Timeline*,int)), this, SLOT(onUpdate(Timeline*,int)));
+	connect(&_twitter, SIGNAL(onError(QNetworkReply::NetworkError,QString)), this, SLOT(onError(QNetworkReply::NetworkError,QString)));
 	connect(ui->txtUpdate, SIGNAL(submit()), this, SLOT(onUpdatePressed()));
 	connect(ui->txtUpdate, SIGNAL(cancel()), this, SLOT(onCancelPressed()));
 	_credentials.loadConfig();
@@ -51,7 +52,7 @@ WndTimeline::WndTimeline(QWidget *parent)
 
 #ifndef _DISABLE_TIMER
 	connect(&timerRefresh, SIGNAL(timeout()), this, SLOT(onRefreshTimeline()));
-	timerRefresh.start(15000);
+	timerRefresh.start(60000);
 #endif
 
 	rubberBand = NULL;
@@ -185,7 +186,9 @@ void WndTimeline::_setWaiting(bool waiting)
 
 void WndTimeline::onFriendsTimeline(Timeline *timeline, int error)
 {
-	if( error != 0 ) return;
+	if( error != 0 ) {
+		return;
+	}
 
 	for(int i=0; i < timeline->getCount(); i++) {
 		const QString &text = timeline->getParam(i, "text");
@@ -198,6 +201,10 @@ void WndTimeline::onFriendsTimeline(Timeline *timeline, int error)
 		} else {
 			_updateItem(i, id, user, picUrl, text);
 		}
+
+		//Setting text to RT
+		_msgList[i] = user + " " + text;
+
 
 	}
 	_setWaiting(false);
@@ -221,9 +228,6 @@ void WndTimeline::_createItem(int pos, const QString &id, const QString &user, c
 	QLabel *lblText = new QLabel(ui->scrTimelineContents);
 	lblText->setObjectName(QString::fromUtf8("lblText"));
 	lblText->setWordWrap(true);
-
-	//Setting text to RT
-	_msgList[pos] = user + " " + text;
 
 	QString itemText = "<a href=\"@" + user + "\"><font color='green'>" + user + "</font></a> ";
 	itemText.append( _changeLinks(text) );
@@ -574,6 +578,12 @@ void WndTimeline::onUpdate(Timeline *timeLine, int error)
 	ui->fraUpdate->setVisible(false);
 
 	onRefreshTimeline();
+}
+
+void WndTimeline::onError(QNetworkReply::NetworkError error, const QString &errorString)
+{
+	ui->statusBar->showMessage(errorString);
+	//FrmNotification::showMessage(errorString);
 }
 
 void WndTimeline::on_txtUpdate_textChanged()
