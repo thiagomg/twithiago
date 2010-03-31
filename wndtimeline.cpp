@@ -251,6 +251,9 @@ void WndTimeline::_createItem(int pos, const QString &id, const QString &user, c
 	layLine->addWidget(lblImg); //, 0, Qt::AlignLeft);
 	layLine->addWidget(lblText, 1);
 
+	QSpacerItem *sp = new QSpacerItem(0, 0, QSizePolicy::MinimumExpanding);
+	layLine->addItem(sp);
+
 	layScr->addLayout( layLine );
 
 	//Line ---------------------------------------------------------

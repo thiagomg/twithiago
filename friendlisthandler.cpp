@@ -2,11 +2,12 @@
 
 FriendListHandler::FriendListHandler()
 {
-	_timeline = NULL;
+	_timeline = new Timeline();
 }
 
 FriendListHandler::~FriendListHandler()
 {
+	delete _timeline;
 }
 
 bool FriendListHandler::startDocument()
@@ -15,7 +16,6 @@ bool FriendListHandler::startDocument()
 	_inUser = false;
 	_level = 0;
 	_pMapStatus = NULL;
-	_timeline = new Timeline();
 
 	return true;
 }
