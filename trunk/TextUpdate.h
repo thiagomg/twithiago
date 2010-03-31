@@ -16,8 +16,9 @@ public:
 protected:
 	virtual void keyPressEvent(QKeyEvent *event) {
 
-		if( event->key() == Qt::Key_Return && event->modifiers() == Qt::ShiftModifier )
+		if( event->key() == Qt::Key_Return && event->modifiers() == Qt::ControlModifier )
 		{
+			event->ignore();
 			emit submit();
 		} else if( event->key() == Qt::Key_Escape ) {
 			emit cancel();
