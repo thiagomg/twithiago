@@ -197,9 +197,9 @@ void WndTimeline::onFriendsTimeline(Timeline *timeline, int error)
 		const QString &picUrl = timeline->getParam(i,_tipoReq==_TIPO_TIMELINE?"user_profile_image_url":"sender_profile_image_url");
 
 		if( (i+1) > _frameList.size() ) {
-			_createItem(i, id, user, picUrl, text);
+			_createItem(i, id, user, picUrl, text, *timeline);
 		} else {
-			_updateItem(i, id, user, picUrl, text);
+			_updateItem(i, id, user, picUrl, text, *timeline);
 		}
 
 		//Setting text to RT
@@ -210,7 +210,7 @@ void WndTimeline::onFriendsTimeline(Timeline *timeline, int error)
 	_setWaiting(false);
 }
 
-void WndTimeline::_createItem(int pos, const QString &id, const QString &user, const QString &picUrl, const QString &text)
+void WndTimeline::_createItem(int pos, const QString &id, const QString &user, const QString &picUrl, const QString &text, const Timeline &timeline)
 {
 
 	if( ui->scrTimelineContents->layout() == NULL ) {
@@ -233,7 +233,20 @@ void WndTimeline::_createItem(int pos, const QString &id, const QString &user, c
 	itemText.append( _changeLinks(text) );
 	itemText.append("<BR>");
 	itemText.append("<a href=\"@@" + id + "|" + user);
-	itemText.append("\">Reply</a> - <a href=\"##" + QString::number(pos) + "\">Retweet</a>");
+	itemText.append("\">Reply</a> - <a href=\"##" + QString::number(pos) + "\">Retweet</a> - ");
+	QString msgDate = timeline.getParam(pos, "created_at");
+	QDateTime dt = QDateTime::fromString( Timeline::cleanDateTime(msgDate), "MM dd HH:mm:ss yyyy" );
+	dt.setTimeSpec( Qt::UTC );
+	QDateTime dt_local = dt.toLocalTime();
+
+	QDateTime now = QDateTime::currentDateTime();
+	if( dt_local.daysTo( now ) > 1 ) {
+		itemText.append(" " + dt_local.toString("dd/MM/yyyy") );
+	} else {
+		itemText.append(" " + dt_local.toString("HH:mm:ss") );
+	}
+	itemText.append(" - From: " + timeline.getParam(pos, "source"));
+
 	lblText->setText(itemText);
 	lblText->setMaximumWidth( ui->scrTimeline->width() - 52 );
 	connect(lblText, SIGNAL(linkActivated(QString)), this, SLOT(linkClicked(QString)));
@@ -267,7 +280,7 @@ void WndTimeline::_createItem(int pos, const QString &id, const QString &user, c
 	_frameList.append( FrameItem(lblImg, lblText) );
 }
 
-void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, const QString &picUrl, const QString &text)
+void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, const QString &picUrl, const QString &text, const Timeline &timeline)
 {
 	if( pos >= _frameList.size() ) {
 		QMessageBox::critical(this, "ERRO!!!", "Update chamado para frame > _frameList.size()");
@@ -288,7 +301,19 @@ void WndTimeline::_updateItem(int pos, const QString &id, const QString &user, c
 	itemText.append( _changeLinks(text) );
 	itemText.append("<BR>");
 	itemText.append("<a href=\"@@" + id + "|" + user);
-	itemText.append("\">Reply</a> - <a href=\"##" + QString::number(pos) + "\">Retweet</a>");
+	itemText.append("\">Reply</a> - <a href=\"##" + QString::number(pos) + "\">Retweet</a> - ");
+	QString msgDate = timeline.getParam(pos, "created_at");
+	QDateTime dt = QDateTime::fromString( Timeline::cleanDateTime(msgDate), "MM dd HH:mm:ss yyyy" );
+	dt.setTimeSpec( Qt::UTC );
+	QDateTime dt_local = dt.toLocalTime();
+
+	QDateTime now = QDateTime::currentDateTime();
+	if( dt_local.daysTo( now ) > 1 ) {
+		itemText.append(" " + dt_local.toString("dd/MM/yyyy") );
+	} else {
+		itemText.append(" " + dt_local.toString("HH:mm:ss") );
+	}
+	itemText.append(" - From: " + timeline.getParam(pos, "source"));
 
 	lblText->setText(itemText);
 
