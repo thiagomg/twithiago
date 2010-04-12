@@ -476,7 +476,7 @@ int WndTimeline::_endTok(const QString &text, int pos)
 	for(i=pos; i < text.size(); i++) {
 		QChar c = text.at(i);
 		if( !(c.isLetterOrNumber() || c == '/' || c == ':' || c == '?' || c == '=' ||
-			  c == '&' || c == '-' || c == '_' || c == '.' || c == '@' || c == '#' ) ) {
+			  c == '&' || c == '-' || c == '_' || c == '.' || c == '@' || c == '#' || c == ',') ) {
 			return i;
 		}
 	}
